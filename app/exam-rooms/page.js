@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 export default function ExamRoomList() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRooms, setSelectedRooms] = useState(new Set());
+  const [action, setAction] = useState('');
 
   useEffect(() => {
     async function fetchExamRooms() {
@@ -12,7 +14,6 @@ export default function ExamRoomList() {
         const response = await fetch('/api/exam-rooms');
         let data = await response.json();
 
-        // format time
         data = data.map((d) => {
           d.timeOpen = formatDateTime(parseInt(d.timeOpen, 10));
           d.timeClose = formatDateTime(parseInt(d.timeClose, 10));
@@ -29,11 +30,10 @@ export default function ExamRoomList() {
     fetchExamRooms();
   }, []);
 
-  function formatDateTime(dateString) {
-    console.log(dateString);
-
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
+  function formatDateTime(number) {
+    number *= 1000;
+    if (!number) return 'N/A';
+    const date = new Date(number);
     return new Intl.DateTimeFormat('vi-VN', {
       hour: '2-digit',
       minute: '2-digit',
@@ -43,9 +43,49 @@ export default function ExamRoomList() {
     }).format(date);
   }
 
+  function toggleSelection(id) {
+    setSelectedRooms((prev) => {
+      const newSelection = new Set(prev);
+      if (newSelection.has(id)) {
+        newSelection.delete(id);
+      } else {
+        newSelection.add(id);
+      }
+      return newSelection;
+    });
+  }
+
+  function handleBulkAction() {
+    if (!action) {
+      alert('Vui lòng chọn một hành động');
+      return;
+    }
+    alert(`Thực hiện hành động '${action}' trên ${selectedRooms.size} phòng`);
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Danh sách Exam Rooms</h1>
+
+      <div className="mb-4 flex gap-4">
+        <select
+          value={action}
+          onChange={(e) => setAction(e.target.value)}
+          className="px-4 py-2 border rounded"
+        >
+          <option value="">Chọn hành động</option>
+          <option value="start">Bắt đầu</option>
+          <option value="stop">Dừng</option>
+          <option value="delete">Xóa</option>
+        </select>
+        <button
+          onClick={handleBulkAction}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
+          disabled={selectedRooms.size === 0 || !action}
+        >
+          Thực hiện
+        </button>
+      </div>
 
       {loading ? (
         <p>Đang tải dữ liệu...</p>
@@ -54,6 +94,7 @@ export default function ExamRoomList() {
           <table className="table-auto w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2">Chọn</th>
                 <th className="border border-gray-300 px-4 py-2">Quiz ID</th>
                 <th className="border border-gray-300 px-4 py-2">Container</th>
                 <th className="border border-gray-300 px-4 py-2">Database</th>
@@ -68,6 +109,13 @@ export default function ExamRoomList() {
             <tbody>
               {rooms.map((room) => (
                 <tr key={room._id} className="text-center">
+                  <td className="border border-gray-300 px-4 py-2">
+                    <input
+                      type="checkbox"
+                      onChange={() => toggleSelection(room._id)}
+                      checked={selectedRooms.has(room._id)}
+                    />
+                  </td>
                   <td className="border border-gray-300 px-4 py-2">
                     {room.quizId}
                   </td>
