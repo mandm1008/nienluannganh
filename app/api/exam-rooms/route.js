@@ -25,6 +25,8 @@ export async function GET() {
       timeClose: quizData.timeclose,
       timeLimit: quizData.timelimit,
       quizName: quizData.name,
+      courseName: quizData.coursename,
+      courseId: quizData.courseid,
       serviceUrl: room.serviceUrl
         ? `${room.serviceUrl}/mod/quiz/view.php?q=${room.quizId}`
         : null,

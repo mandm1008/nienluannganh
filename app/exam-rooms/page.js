@@ -21,7 +21,7 @@ export default function ExamCalendar() {
           .filter((exam) => exam.timeOpen > 0)
           .map((exam) => ({
             id: exam._id,
-            title: exam.quizName,
+            title: `${exam.quizName} (${exam.courseName})`,
             start: moment.unix(exam.timeOpen).toISOString(),
             end: moment.unix(exam.timeClose).toISOString(),
             allDay: false,

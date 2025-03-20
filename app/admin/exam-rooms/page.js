@@ -7,6 +7,7 @@ import {
   STOP_CTN,
 } from '@/lib/tools/constants/exam-room';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 export default function ExamRoomList() {
   const [rooms, setRooms] = useState([]);
@@ -26,12 +27,8 @@ export default function ExamRoomList() {
 
       data = data.map((d) => ({
         ...d,
-        timeOpen: new Date(parseInt(d.timeOpen, 10) * 1000)
-          .toISOString()
-          .slice(0, 16),
-        timeClose: new Date(parseInt(d.timeClose, 10) * 1000)
-          .toISOString()
-          .slice(0, 16),
+        timeOpen: moment.unix(d.timeOpen).toISOString().slice(0, 16),
+        timeClose: moment.unix(d.timeOpen).toISOString().slice(0, 16),
       }));
 
       setRooms(data);
@@ -54,12 +51,12 @@ export default function ExamRoomList() {
     });
   }
 
-  function handleTimeChange(id, field, value) {
-    setRooms((prevRooms) =>
-      prevRooms.map((room) =>
-        room._id === id ? { ...room, [field]: value } : room
-      )
-    );
+  function selectAll() {
+    setSelectedRooms(new Set(rooms.map((room) => room._id)));
+  }
+
+  function deselectAll() {
+    setSelectedRooms(new Set());
   }
 
   async function handleBulkAction() {
@@ -78,17 +75,14 @@ export default function ExamRoomList() {
 
     setIsRunning(true);
     try {
-      const response = await fetch('/api/exam-rooms', {
+      await fetch('/api/exam-rooms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ action, rooms: selectedData }),
       });
-      const result = await response.json();
-      console.log(result);
 
-      // Update UI
       await fetchExamRooms();
     } catch (error) {
       console.error('Lỗi khi gửi yêu cầu:', error);
@@ -114,7 +108,7 @@ export default function ExamRoomList() {
         </select>
         <button
           onClick={handleBulkAction}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400 flex items-center"
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
           disabled={selectedRooms.size === 0 || !action || isRunning}
         >
           Thực hiện
@@ -123,11 +117,23 @@ export default function ExamRoomList() {
           <Image
             src="/loading.svg"
             alt="Loading"
-            width={32}
-            height={32}
+            width={40}
+            height={40}
             className="ml-2"
           />
         )}
+        <button
+          onClick={selectAll}
+          className="px-4 py-2 bg-green-500 text-white rounded"
+        >
+          Chọn tất cả
+        </button>
+        <button
+          onClick={deselectAll}
+          className="px-4 py-2 bg-red-500 text-white rounded"
+        >
+          Hủy chọn tất cả
+        </button>
       </div>
 
       {loading ? (
@@ -139,7 +145,10 @@ export default function ExamRoomList() {
               <tr className="bg-gray-200">
                 <th className="border border-gray-300 px-4 py-2">Chọn</th>
                 <th className="border border-gray-300 px-4 py-2">Quiz ID</th>
-                <th className="border border-gray-300 px-4 py-2">Container</th>
+                <th className="border border-gray-300 px-4 py-2">Quiz Name</th>
+                <th className="border border-gray-300 px-4 py-2">
+                  Course Name
+                </th>
                 <th className="border border-gray-300 px-4 py-2">Database</th>
                 <th className="border border-gray-300 px-4 py-2">Folder</th>
                 <th className="border border-gray-300 px-4 py-2">
@@ -157,13 +166,17 @@ export default function ExamRoomList() {
                       type="checkbox"
                       onChange={() => toggleSelection(room._id)}
                       checked={selectedRooms.has(room._id)}
+                      className="w-5 h-5"
                     />
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     {room.quizId}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
-                    {room.containerName}
+                    {room.quizName}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {room.courseName}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     {room.dbName}
@@ -188,22 +201,16 @@ export default function ExamRoomList() {
                     <input
                       type="datetime-local"
                       value={room.timeOpen}
-                      onChange={(e) =>
-                        handleTimeChange(room._id, 'timeOpen', e.target.value)
-                      }
-                      disabled={true}
-                      className="time-open w-full p-1 border rounded"
+                      disabled
+                      className="w-full p-1 border rounded"
                     />
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     <input
                       type="datetime-local"
                       value={room.timeClose}
-                      onChange={(e) =>
-                        handleTimeChange(room._id, 'timeClose', e.target.value)
-                      }
-                      disabled={true}
-                      className="time-close w-full p-1 border rounded"
+                      disabled
+                      className="w-full p-1 border rounded"
                     />
                   </td>
                 </tr>
