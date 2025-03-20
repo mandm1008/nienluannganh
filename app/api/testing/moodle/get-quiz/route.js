@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getQuizById } from '@/lib/moodle-sql/get-quiz';
+import { getQuizById } from '@/lib/moodle/get-quiz';
 
 export async function GET(req) {
   const { searchParams } = req.nextUrl;

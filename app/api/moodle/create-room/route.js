@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getQuizById } from '@/lib/moodle-sql/get-quiz';
+import { getQuizById } from '@/lib/moodle/get-quiz';
 import { connect } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { updateSchedule } from '@/lib/tools/schedule';

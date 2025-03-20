@@ -1,4 +1,4 @@
-import { getQuizIdsByCourseId } from '@/lib/moodle-sql/get-quiz';
+import { getQuizIdsByCourseId } from '@/lib/moodle/get-quiz';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
