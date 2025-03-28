@@ -10,7 +10,7 @@ export async function GET(req) {
     const quizId = parseInt(searchParams.get('id'), 10);
     const uniqueId = Date.now();
     const dbName = `moodle${uniqueId}`;
-    const folderName = `moodledata-${uniqueId}/`;
+    const folderName = `moodledata-${uniqueId}`;
     const serviceName = `elearningsystem-${uniqueId}`;
 
     // Kiểm tra ID quiz hợp lệ

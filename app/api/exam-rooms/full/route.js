@@ -23,6 +23,7 @@ export async function GET() {
 
     data.push({
       ...room.toObject(),
+      ...quizData,
       timeOpen: quizData.timeopen,
       timeClose: quizData.timeclose,
       timeLimit: quizData.timelimit,
