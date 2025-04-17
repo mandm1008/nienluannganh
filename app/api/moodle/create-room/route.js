@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getQuizById } from '@/lib/moodle/get-quiz';
-import { connect } from '@/lib/db/connect';
+import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { updateSchedule } from '@/lib/tools/schedule';
 
@@ -19,7 +19,7 @@ export async function GET(req) {
       return NextResponse.json({ error: 'Invalid quiz ID' }, { status: 400 });
     }
 
-    await connect();
+    await connectDB();
     // Check quiz in db
     const room = await ExamRoomModel.findOne({ quizId });
     if (room) {

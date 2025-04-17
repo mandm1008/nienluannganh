@@ -104,7 +104,7 @@ export default function ExamRoomList() {
           <option value="">Chọn hành động</option>
           <option value={START_CTN}>Start Container Now</option>
           <option value={STOP_CTN}>Stop Container Now</option>
-          <option value={DELETE_DATA}>Delete All</option>
+          <option value={DELETE_DATA}>Delete Selected</option>
         </select>
         <button
           onClick={handleBulkAction}

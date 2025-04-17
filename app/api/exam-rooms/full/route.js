@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connect } from '@/lib/db/connect';
+import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
 import {
@@ -12,7 +12,7 @@ import { deployCloudRun } from '@/lib/cloud/run/deploy-moodle';
 import { deleteCloudRun } from '@/lib/cloud/run/delete-moodle';
 
 export async function GET() {
-  await connect();
+  await connectDB();
   const rooms = await ExamRoomModel.find();
   const data = [];
 
@@ -48,7 +48,7 @@ export async function POST(req) {
 
   console.log('@POST /api/exam-rooms -- ' + action + ': ', rooms);
 
-  await connect();
+  await connectDB();
 
   switch (action) {
     case START_CTN:

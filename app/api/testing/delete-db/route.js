@@ -1,9 +1,9 @@
-import { connectGCSQL } from '@/lib/cloud/sql/connect';
+import { connectPubDB } from '@/lib/cloud/sql/connect';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const connection = await connectGCSQL();
+    const connection = await connectPubDB();
 
     // Lấy danh sách database có tên bắt đầu bằng "moodle" + số
     const [databases] = await connection.query(
