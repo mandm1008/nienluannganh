@@ -12,7 +12,8 @@ export async function POST(req) {
 
     if (
       eventName === '\\core\\event\\calendar_event_updated' ||
-      eventName === '\\core\\event\\calendar_event_created'
+      eventName === '\\core\\event\\calendar_event_created' ||
+      eventName === '\\core\\event\\calendar_event_deleted'
     ) {
       const courseId = event.courseid;
       const quizIds = await getQuizIdsByCourseId(courseId);
