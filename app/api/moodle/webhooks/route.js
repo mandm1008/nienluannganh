@@ -48,17 +48,17 @@ export async function POST(req) {
     objectid: '2',
     crud: 'u',
     edulevel: 0,
-    contextid: 21,
+    contextid: 14,
     contextlevel: 50,
     contextinstanceid: '2',
     userid: '2',
     courseid: '2',
     relateduserid: null,
     anonymous: 0,
-    other: { repeatid: 0, timestart: 1742774340, name: 'KTCK (Quiz closes)' },
-    timecreated: 1742294358,
-    host: '34.142.220.218',
-    token: '',
+    other: { repeatid: 0, timestart: 1748155680, name: 'Thi giữa kì closes' },
+    timecreated: 1747897019,
+    host: 'elsystem.dominhman.id.vn',
+    token: 'f8a97224f718091201ca4291ec351dc2',
     extra: ''
   }
-    */
+*/
