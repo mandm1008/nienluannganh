@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { backupCourse } from '@/lib/moodle/backup';
+import { NextResponse } from 'next/server';
+import { backupCourse, exportUsers } from '@/lib/moodle/backup';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const courseid = searchParams.get('courseid');
-  const download = searchParams.get('download') !== null;
 
-  console.log(courseid, download);
+  console.log('CourseID: ' + courseid);
 
-  const res = await backupCourse(courseid, download);
+  const resBackup = await backupCourse(courseid);
+  const resUsers = await exportUsers(courseid);
 
-  return NextResponse.json(res, { status: 200 });
+  return NextResponse.json({ resBackup, resUsers }, { status: 200 });
 }

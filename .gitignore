@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/lib/moodle/stemp
+/lib/cloud/sql/data
 
 # next.js
 /.next/
