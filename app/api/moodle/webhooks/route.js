@@ -1,4 +1,5 @@
 import { getQuizIdsByCourseId } from '@/lib/moodle/get-quiz';
+import handleEvents from '@/lib/moodle/webhooks';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
@@ -7,58 +8,11 @@ export async function POST(req) {
 
     console.log('Received Moodle Webhook:', event);
 
-    // data
-    const eventName = event.eventname;
+    const res = await handleEvents(event);
 
-    if (
-      eventName === '\\core\\event\\calendar_event_updated' ||
-      eventName === '\\core\\event\\calendar_event_created' ||
-      eventName === '\\core\\event\\calendar_event_deleted'
-    ) {
-      const courseId = event.courseid;
-      const quizIds = await getQuizIdsByCourseId(courseId);
-      console.log(`Quiz updated: ${event.other.name}`);
-      console.log(`Quiz updated ids: ${quizIds}`);
-
-      // Update quiz in your database
-      for (const quizId of quizIds) {
-        const response = await fetch(
-          `http://localhost:3000/api/moodle/create-room?id=${quizId}`
-        );
-        if (!response.ok) {
-          console.error(`Failed to create room: ${await response.text()}`);
-        }
-      }
-    }
-
-    return NextResponse.json({ message: 'Webhook received' }, { status: 200 });
+    return NextResponse.json(res, { status: 200 });
   } catch (error) {
     console.error('Error processing Moodle Webhook:', error);
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 }
-
-/* Sample data
-  Received Moodle Webhook: {
-    eventname: '\\core\\event\\calendar_event_updated',
-    component: 'core',
-    action: 'updated',
-    target: 'calendar_event',
-    objecttable: 'event',
-    objectid: '2',
-    crud: 'u',
-    edulevel: 0,
-    contextid: 14,
-    contextlevel: 50,
-    contextinstanceid: '2',
-    userid: '2',
-    courseid: '2',
-    relateduserid: null,
-    anonymous: 0,
-    other: { repeatid: 0, timestart: 1748155680, name: 'Thi giữa kì closes' },
-    timecreated: 1747897019,
-    host: 'elsystem.dominhman.id.vn',
-    token: 'f8a97224f718091201ca4291ec351dc2',
-    extra: ''
-  }
-*/

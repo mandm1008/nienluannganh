@@ -8,8 +8,16 @@ export async function GET(req) {
   try {
     const { searchParams } = req.nextUrl;
     const quizId = parseInt(searchParams.get('id'), 10);
-    const uniqueId = Date.now();
-    const dbName = `moodle${uniqueId}`;
+    const now = new Date();
+    const uniqueId =
+      now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0') +
+      '' +
+      String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0');
+    const dbName = `moodle_${uniqueId}`;
     const folderName = `moodledata-${uniqueId}`;
     const serviceName = `elearningsystem-${uniqueId}`;
 

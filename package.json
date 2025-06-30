@@ -22,7 +22,7 @@
     "moment": "^2.30.1",
     "mongoose": "^8.12.1",
     "mysql2": "^3.13.0",
-    "next": "15.2.1",
+    "next": "15.2.4",
     "node-schedule": "^2.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
