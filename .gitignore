@@ -14,6 +14,7 @@
 /coverage
 /lib/moodle/stemp
 /lib/cloud/sql/data
+/*.mongodb.js
 
 # next.js
 /.next/

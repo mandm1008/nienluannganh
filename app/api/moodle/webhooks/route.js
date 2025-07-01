@@ -1,4 +1,3 @@
-import { getQuizIdsByCourseId } from '@/lib/moodle/get-quiz';
 import handleEvents from '@/lib/moodle/webhooks';
 import { NextResponse } from 'next/server';
 
@@ -10,7 +9,7 @@ export async function POST(req) {
 
     const res = await handleEvents(event);
 
-    return NextResponse.json(res, { status: 200 });
+    return NextResponse.json({ res }, { status: 200 });
   } catch (error) {
     console.error('Error processing Moodle Webhook:', error);
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
