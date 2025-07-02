@@ -16,6 +16,7 @@
     "@fullcalendar/timegrid": "^6.1.15",
     "@tippyjs/react": "^4.2.6",
     "child_process": "^1.0.2",
+    "cron": "^4.3.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "lucide-react": "^0.483.0",
