@@ -1,7 +1,8 @@
 // pages/api/socket.js
 import { Server } from 'socket.io';
 import { EventManager } from '@/lib/tools/events';
-import { STATUS_CHANGE } from '@/lib/moodle/status';
+import { STATUS_CHANGE, STATUS_SOCKET_NAME } from '@/lib/moodle/status';
+import { startAutoFix } from '@/lib/moodle/auto-fix';
 
 export default function handler(req, res) {
   if (!res.socket.server.io) {
@@ -15,9 +16,11 @@ export default function handler(req, res) {
     io.on('connection', (socket) => {
       console.log('[SOCKET] Connected:', socket.id);
 
-      socket.on('subscribe:status', (containerName) => {
+      socket.on(`subscribe:${STATUS_SOCKET_NAME}`, (containerName) => {
         socket.join(containerName);
-        console.log(`[SOCKET] ${socket.id} joined room: ${containerName}`);
+        console.log(
+          `[SOCKET] ${socket.id} joined room: ${STATUS_SOCKET_NAME}:${containerName}`
+        );
       });
 
       socket.on('disconnect', () => {
@@ -26,9 +29,17 @@ export default function handler(req, res) {
     });
 
     EventManager.on(STATUS_CHANGE, ({ containerName, status }) => {
-      console.log(`[SOCKET] Status for ${containerName}: ${status}`);
-      io.to(containerName).emit('status:update', { containerName, status });
+      console.log(
+        `[SOCKET] Status for ${STATUS_SOCKET_NAME}:${containerName} -> ${status}`
+      );
+      io.to(containerName).emit(`update:${STATUS_SOCKET_NAME}`, {
+        containerName,
+        status,
+      });
     });
+
+    // auto fix error container logic
+    startAutoFix();
 
     res.socket.server.io = io;
   }

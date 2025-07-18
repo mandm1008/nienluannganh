@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/exam-room';
+import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/actions';
 import { useState } from 'react';
 import useSWR from 'swr';
 import moment from 'moment';
@@ -25,6 +25,8 @@ export default function ExamRoomList() {
     mutate, // để gọi lại thủ công sau khi POST
   } = useSWR('/api/exam-rooms', fetcher, {
     refreshInterval: 10000, // tự động refresh mỗi 10s
+    revalidateOnMount: true,
+    revalidateIfStale: true,
   });
 
   const [selectedRooms, setSelectedRooms] = useState(new Set());
@@ -166,8 +168,8 @@ export default function ExamRoomList() {
                   </td>
                 </tr>
               ) : (
-                rooms.map((room) => (
-                  <tr key={room._id} className="text-center">
+                rooms.map((room, index) => (
+                  <tr key={room._id || index} className="text-center">
                     <td className="border border-gray-300 px-4 py-2">
                       <input
                         type="checkbox"
@@ -194,15 +196,26 @@ export default function ExamRoomList() {
                     <td className="border border-gray-300 px-4 py-2">
                       {room.serviceUrl ? (
                         <a
-                          href={room.serviceUrl}
-                          className="text-blue-500 underline"
+                          href={
+                            room.serviceUrl && room.containerCourseId
+                              ? room.serviceUrl
+                              : undefined
+                          }
+                          onClick={(e) => {
+                            if (!room.containerCourseId) e.preventDefault();
+                          }}
+                          className={`px-2 py-1 text-sm rounded font-medium inline-block whitespace-nowrap ${
+                            room.containerCourseId
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none'
+                          }`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Link
+                          Go!
                         </a>
                       ) : (
-                        'Wait open time'
+                        'No deploy'
                       )}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">

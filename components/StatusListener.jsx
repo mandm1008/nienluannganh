@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import socket from '@/lib/tools/socket';
-import { getStatusLabel } from '@/lib/moodle/status';
+import { getStatusLabel, STATUS_SOCKET_NAME } from '@/lib/moodle/status';
 
 export default function StatusListener({
   containerName,
@@ -16,16 +16,16 @@ export default function StatusListener({
     if (!socket.connected) socket.connect();
 
     // Subscribe to a specific container channel
-    socket.emit('subscribe:status', containerName);
+    socket.emit(`subscribe:${STATUS_SOCKET_NAME}`, containerName);
 
     const handler = ({ containerName: name, status }) => {
       if (containerName === name) setStatus(status);
     };
 
-    socket.on('status:update', handler);
+    socket.on(`update:${STATUS_SOCKET_NAME}`, handler);
 
     return () => {
-      socket.off('status:update', handler);
+      socket.off(`update:${STATUS_SOCKET_NAME}`, handler);
     };
   }, [containerName]);
 

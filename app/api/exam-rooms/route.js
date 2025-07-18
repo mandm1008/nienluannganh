@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
-import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/exam-room';
+import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/actions';
 import { deployCloudRun, deleteCloudRun } from '@/lib/cloud/run/controls';
 import { createGCRJob, deleteGCRJob, stopGCRJob } from '@/lib/moodle/jobs';
 

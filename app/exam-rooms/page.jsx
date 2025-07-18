@@ -19,6 +19,7 @@ const fetcher = async (url) => {
   return examData
     .filter((exam) => exam.timeOpen > 0)
     .map((exam) => ({
+      ...exam,
       id: exam._id,
       title: `${exam.quizName} (${exam.courseName})`,
       start: moment.unix(exam.timeOpen).toISOString(),
@@ -35,19 +36,31 @@ export default function ExamCalendar() {
     isLoading,
   } = useSWR('/api/exam-rooms', fetcher, {
     refreshInterval: 10000,
+    revalidateOnMount: true,
+    revalidateIfStale: true,
   });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
 
   useEffect(() => {
-    if (events && events.length > 0) {
-      const filtered = events.filter((event) =>
+    if (!events || events.length === 0) {
+      if (filteredEvents.length !== 0) setFilteredEvents([]);
+      return;
+    }
+
+    const filtered = events.filter(
+      (event) =>
+        event.title &&
         event.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    );
+
+    const isSame =
+      filteredEvents.length === filtered.length &&
+      filteredEvents.every((e, i) => e.id === filtered[i].id);
+
+    if (!isSame) {
       setFilteredEvents(filtered);
-    } else {
-      setFilteredEvents([]);
     }
   }, [searchTerm, events]);
 
