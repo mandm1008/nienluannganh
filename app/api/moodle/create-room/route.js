@@ -27,6 +27,26 @@ export async function GET(req) {
       return NextResponse.json({ error: 'Invalid quiz ID' }, { status: 400 });
     }
 
+    // Check time quiz
+    const OFFSETCLOSETIME = process.env.MOODLE_OFFSET_CLOSETIME;
+    const offsetTime = OFFSETCLOSETIME ? parseInt(OFFSETCLOSETIME) : 10; // default: 10'
+    const { timeopen, timeclose } = quizData;
+    const nowTimestamp = now.getTime();
+    const pastThreshold = nowTimestamp - offsetTime * 60 * 1000;
+
+    // Nếu cả timeopen và timeclose đều kết thúc >10p trước -> bỏ qua
+    if (
+      typeof timeopen === 'number' &&
+      typeof timeclose === 'number' &&
+      timeopen * 1000 < pastThreshold &&
+      timeclose * 1000 < pastThreshold
+    ) {
+      return NextResponse.json(
+        { error: 'Quiz đã kết thúc quá lâu, không tạo room' },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
     // Check quiz in db
     const room = await ExamRoomModel.findOne({ quizId });

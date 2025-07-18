@@ -1,43 +1,35 @@
 'use client';
 
 import Image from 'next/image';
-import {
-  DELETE_DATA,
-  START_CTN,
-  STOP_CTN,
-} from '@/lib/tools/constants/exam-room';
-import { useEffect, useState } from 'react';
+import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/exam-room';
+import { useState } from 'react';
+import useSWR from 'swr';
 import moment from 'moment';
+import StatusListener from '@/components/StatusListener';
+
+const fetcher = async (url) => {
+  const response = await fetch(url);
+  let data = await response.json();
+  return data.map((d) => ({
+    ...d,
+    timeOpen: moment.unix(d.timeOpen).local().format('YYYY-MM-DDTHH:mm'),
+    timeClose: moment.unix(d.timeClose).local().format('YYYY-MM-DDTHH:mm'),
+  }));
+};
 
 export default function ExamRoomList() {
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: rooms = [],
+    error,
+    isLoading,
+    mutate, // để gọi lại thủ công sau khi POST
+  } = useSWR('/api/exam-rooms', fetcher, {
+    refreshInterval: 10000, // tự động refresh mỗi 10s
+  });
+
   const [selectedRooms, setSelectedRooms] = useState(new Set());
   const [action, setAction] = useState('');
   const [isRunning, setIsRunning] = useState(false);
-
-  useEffect(() => {
-    fetchExamRooms();
-  }, []);
-
-  async function fetchExamRooms() {
-    try {
-      const response = await fetch('/api/exam-rooms');
-      let data = await response.json();
-
-      data = data.map((d) => ({
-        ...d,
-        timeOpen: moment.unix(d.timeOpen).toISOString().slice(0, 16),
-        timeClose: moment.unix(d.timeOpen).toISOString().slice(0, 16),
-      }));
-
-      setRooms(data);
-    } catch (error) {
-      console.error('Lỗi khi lấy danh sách ExamRoom:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function toggleSelection(id) {
     setSelectedRooms((prev) => {
@@ -83,7 +75,7 @@ export default function ExamRoomList() {
         body: JSON.stringify({ action, rooms: selectedData }),
       });
 
-      await fetchExamRooms();
+      await mutate(); // reload lại data ngay sau khi thực hiện xong
     } catch (error) {
       console.error('Lỗi khi gửi yêu cầu:', error);
     } finally {
@@ -102,9 +94,11 @@ export default function ExamRoomList() {
           className="px-4 py-2 border rounded"
         >
           <option value="">Chọn hành động</option>
-          <option value={START_CTN}>Start Container Now</option>
-          <option value={STOP_CTN}>Stop Container Now</option>
-          <option value={DELETE_DATA}>Delete Selected</option>
+          <option value={EXAMROOM_ACTIONS.START_CTN}>Start Container</option>
+          <option value={EXAMROOM_ACTIONS.STOP_CTN}>Stop Container</option>
+          <option value={EXAMROOM_ACTIONS.DELETE_DATA}>
+            Delete (Không lưu)
+          </option>
         </select>
         <button
           onClick={handleBulkAction}
@@ -136,8 +130,10 @@ export default function ExamRoomList() {
         </button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <p>Đang tải dữ liệu...</p>
+      ) : error ? (
+        <p className="text-red-500">Lỗi khi tải dữ liệu.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="table-auto w-full border-collapse border border-gray-300">
@@ -154,67 +150,83 @@ export default function ExamRoomList() {
                 <th className="border border-gray-300 px-4 py-2">
                   Service URL
                 </th>
+                <th className="border border-gray-300 px-4 py-2">Status</th>
                 <th className="border border-gray-300 px-4 py-2">Open Time</th>
                 <th className="border border-gray-300 px-4 py-2">Close Time</th>
               </tr>
             </thead>
             <tbody>
-              {rooms.map((room) => (
-                <tr key={room._id} className="text-center">
-                  <td className="border border-gray-300 px-4 py-2">
-                    <input
-                      type="checkbox"
-                      onChange={() => toggleSelection(room._id)}
-                      checked={selectedRooms.has(room._id)}
-                      className="w-5 h-5"
-                    />
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {room.quizId}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {room.quizName}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {room.courseName}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {room.dbName}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {room.folderName}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {room.serviceUrl ? (
-                      <a
-                        href={room.serviceUrl}
-                        className="text-blue-500 underline"
-                        target="_blank"
-                      >
-                        Link
-                      </a>
-                    ) : (
-                      'Wait open time'
-                    )}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    <input
-                      type="datetime-local"
-                      value={room.timeOpen}
-                      disabled
-                      className="w-full p-1 border rounded"
-                    />
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    <input
-                      type="datetime-local"
-                      value={room.timeClose}
-                      disabled
-                      className="w-full p-1 border rounded"
-                    />
+              {rooms.length === 0 ? (
+                <tr>
+                  <td colSpan="10" className="text-center text-gray-500 py-4">
+                    Không có lịch thi nào sắp đến
                   </td>
                 </tr>
-              ))}
+              ) : (
+                rooms.map((room) => (
+                  <tr key={room._id} className="text-center">
+                    <td className="border border-gray-300 px-4 py-2">
+                      <input
+                        type="checkbox"
+                        onChange={() => toggleSelection(room._id)}
+                        checked={selectedRooms.has(room._id)}
+                        className="w-5 h-5"
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {room.quizId}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {room.quizName}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {room.courseName}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {room.dbName}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {room.folderName}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {room.serviceUrl ? (
+                        <a
+                          href={room.serviceUrl}
+                          className="text-blue-500 underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Link
+                        </a>
+                      ) : (
+                        'Wait open time'
+                      )}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      <StatusListener
+                        containerName={room.containerName}
+                        initialStatus={room.status}
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      <input
+                        type="datetime-local"
+                        value={room.timeOpen}
+                        disabled
+                        className="w-full p-1 border rounded"
+                      />
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      <input
+                        type="datetime-local"
+                        value={room.timeClose}
+                        disabled
+                        className="w-full p-1 border rounded"
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

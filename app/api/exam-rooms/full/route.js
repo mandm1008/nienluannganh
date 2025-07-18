@@ -2,14 +2,8 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
-import {
-  DELETE_DATA,
-  START_CTN,
-  STOP_CTN,
-  UPDATE_DATA,
-} from '@/lib/tools/constants/exam-room';
-import { deployCloudRun } from '@/lib/cloud/run/deploy-moodle';
-import { deleteCloudRun } from '@/lib/cloud/run/delete-moodle';
+import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/exam-room';
+import { deployCloudRun, deleteCloudRun } from '@/lib/cloud/run/controls';
 
 export async function GET() {
   await connectDB();
@@ -51,7 +45,7 @@ export async function POST(req) {
   await connectDB();
 
   switch (action) {
-    case START_CTN:
+    case EXAMROOM_ACTIONS.START_CTN:
       for (const room of rooms) {
         // start container
         try {
@@ -71,7 +65,7 @@ export async function POST(req) {
         }
       }
       break;
-    case STOP_CTN:
+    case EXAMROOM_ACTIONS.STOP_CTN:
       for (const room of rooms) {
         // delete container
         try {
@@ -94,12 +88,12 @@ export async function POST(req) {
         }
       }
       break;
-    case UPDATE_DATA:
+    case EXAMROOM_ACTIONS.UPDATE_DATA:
       for (const room of rooms) {
         // update data
       }
       break;
-    case DELETE_DATA:
+    case EXAMROOM_ACTIONS.DELETE_DATA:
       for (const room of rooms) {
         // delete data
         try {

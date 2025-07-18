@@ -2,14 +2,9 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
-import {
-  DELETE_DATA,
-  START_CTN,
-  STOP_CTN,
-  UPDATE_DATA,
-} from '@/lib/tools/constants/exam-room';
-import { deployCloudRun } from '@/lib/cloud/run/deploy-moodle';
-import { deleteCloudRun } from '@/lib/cloud/run/delete-moodle';
+import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/exam-room';
+import { deployCloudRun, deleteCloudRun } from '@/lib/cloud/run/controls';
+import { createGCRJob, deleteGCRJob, stopGCRJob } from '@/lib/moodle/jobs';
 
 export async function GET() {
   await connectDB();
@@ -28,7 +23,7 @@ export async function GET() {
       courseName: quizData.coursename,
       courseId: quizData.courseid,
       serviceUrl: room.serviceUrl
-        ? `${room.serviceUrl}/mod/quiz/view.php?q=${room.quizId}`
+        ? `${room.serviceUrl}/course/view.php?id=${room.containerCourseId}`
         : null,
     });
   }
@@ -48,84 +43,55 @@ export async function POST(req) {
   await connectDB();
 
   switch (action) {
-    case START_CTN:
+    case EXAMROOM_ACTIONS.START_CTN:
       for (const room of rooms) {
         // start container
         try {
           const nroom = await ExamRoomModel.findById(room.id);
           if (!nroom.serviceUrl) {
-            const { serviceUrl } = await deployCloudRun(
-              nroom.quizId,
-              nroom.containerName,
-              nroom.dbName,
-              nroom.folderName
-            );
-            nroom.serviceUrl = serviceUrl;
-            await nroom.save();
+            await createGCRJob(nroom.containerName);
           }
         } catch (err) {
-          console.error(`�� ${err.message}`);
+          console.error(`[ADMIN_ACTION]@@ ${err.message}`);
         }
       }
       break;
-    case STOP_CTN:
+    case EXAMROOM_ACTIONS.STOP_CTN:
       for (const room of rooms) {
-        // delete container
         try {
           const nroom = await ExamRoomModel.findById(room.id);
           if (nroom.serviceUrl) {
-            // delete cloud run
-            const { success, message } = await deleteCloudRun(
-              nroom.containerName
-            );
-            if (success) {
-              console.log(`�� ${message}`);
-              nroom.serviceUrl = null;
-              await nroom.save();
-            } else {
-              console.error(`�� ${message}`);
-            }
+            await stopGCRJob(nroom.containerName);
           }
         } catch (err) {
-          console.error(`�� ${err.message}`);
+          console.error(`[ADMIN_ACTION]@@ ${err.message}`);
         }
       }
       break;
-    case UPDATE_DATA:
+    case EXAMROOM_ACTIONS.UPDATE_DATA:
       for (const room of rooms) {
         // update data
       }
       break;
-    case DELETE_DATA:
+    case EXAMROOM_ACTIONS.DELETE_DATA:
       for (const room of rooms) {
         // delete data
         try {
           const nroom = await ExamRoomModel.findById(room.id);
           if (nroom.serviceUrl) {
-            // delete cloud run
-            const { success, message } = await deleteCloudRun(
-              nroom.containerName
-            );
-            if (success) {
-              console.log(`�� ${message}`);
-            } else {
-              console.error(`�� ${message}`);
-            }
+            await deleteGCRJob(nroom.containerName, { saveData: false });
           }
-
-          await ExamRoomModel.deleteOne({ _id: nroom._id });
-          console.log('Delete exam-room on db successfully');
         } catch (err) {
-          console.error(`�� ${err.message}`);
+          console.error(`[ADMIN_ACTION]@@ ${err.message}`);
         }
       }
       break;
     default:
       return NextResponse.json(
-        { error: 'Hành đ��ng không h��p lệ' },
+        { error: 'Hành động không hợp lệ!' },
         { status: 400 }
       );
   }
 
-  return NextResponse.json({ message: 'Xử lý thành công' }, { status: 200 });
+  return NextResponse.json({ message: 'Xử lý thành công!' }, { status: 200 });
 }
