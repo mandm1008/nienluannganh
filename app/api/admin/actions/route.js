@@ -11,6 +11,7 @@ import {
   stopGCRJob,
   fixErrorJob,
 } from '@/lib/moodle/jobs';
+import { authOptions } from '@/lib/auth/options';
 
 export async function POST(req) {
   const session = await getServerSession(authOptions);
