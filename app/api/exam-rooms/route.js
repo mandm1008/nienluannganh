@@ -73,6 +73,19 @@ export async function POST(req) {
         // update data
       }
       break;
+    case EXAMROOM_ACTIONS.DELETE_SAVE_DATA:
+      for (const room of rooms) {
+        // delete and save data
+        try {
+          const nroom = await ExamRoomModel.findById(room.id);
+          if (nroom.serviceUrl) {
+            await deleteGCRJob(nroom.containerName);
+          }
+        } catch (err) {
+          console.error(`[ADMIN_ACTION]@@ ${err.message}`);
+        }
+      }
+      break;
     case EXAMROOM_ACTIONS.DELETE_DATA:
       for (const room of rooms) {
         // delete data

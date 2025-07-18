@@ -99,6 +99,9 @@ export default function ExamRoomList() {
           <option value={EXAMROOM_ACTIONS.DELETE_DATA}>
             Delete (Không lưu)
           </option>
+          <option value={EXAMROOM_ACTIONS.DELETE_SAVE_DATA}>
+            Delete (Lưu)
+          </option>
         </select>
         <button
           onClick={handleBulkAction}

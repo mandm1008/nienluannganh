@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 import socket from '@/lib/tools/socket';
 import { getStatusLabel } from '@/lib/moodle/status';
 
-export default function StatusListener({ containerName, initialStatus = null }) {
+export default function StatusListener({
+  containerName,
+  initialStatus = null,
+}) {
   const [status, setStatus] = useState(initialStatus);
 
   useEffect(() => {
@@ -15,8 +18,8 @@ export default function StatusListener({ containerName, initialStatus = null }) 
     // Subscribe to a specific container channel
     socket.emit('subscribe:status', containerName);
 
-    const handler = ({ status }) => {
-      setStatus(status);
+    const handler = ({ containerName: name, status }) => {
+      if (containerName === name) setStatus(status);
     };
 
     socket.on('status:update', handler);
@@ -31,9 +34,7 @@ export default function StatusListener({ containerName, initialStatus = null }) 
   }
 
   return (
-    <span
-      className="px-2 py-1 text-sm rounded bg-blue-100 text-blue-800 font-medium inline-block whitespace-nowrap"
-    >
+    <span className="px-2 py-1 text-sm rounded bg-blue-100 text-blue-800 font-medium inline-block whitespace-nowrap">
       {getStatusLabel(status)}
     </span>
   );
