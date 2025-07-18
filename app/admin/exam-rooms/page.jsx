@@ -6,6 +6,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import moment from 'moment';
 import StatusListener from '@/components/StatusListener';
+import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/errors';
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -69,7 +70,7 @@ export default function ExamRoomList() {
 
     setIsRunning(true);
     try {
-      await fetch('/api/exam-rooms', {
+      await fetch('/api/admin/actions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export default function ExamRoomList() {
         body: JSON.stringify({ action, rooms: selectedData }),
       });
 
-      await mutate(); // reload lại data ngay sau khi thực hiện xong
+      await mutate();
     } catch (error) {
       console.error('Lỗi khi gửi yêu cầu:', error);
     } finally {
@@ -104,6 +105,7 @@ export default function ExamRoomList() {
           <option value={EXAMROOM_ACTIONS.DELETE_SAVE_DATA}>
             Delete (Lưu)
           </option>
+          <option value={EXAMROOM_ACTIONS.FIX_CTN}>Sửa lỗi</option>
         </select>
         <button
           onClick={handleBulkAction}
@@ -219,10 +221,16 @@ export default function ExamRoomList() {
                       )}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
-                      <StatusListener
-                        containerName={room.containerName}
-                        initialStatus={room.status}
-                      />
+                      {room.error === ERROR_CODE.ERROR_KILL ? (
+                        <button className="bg-red-600 text-white px-3 py-1 rounded font-bold">
+                          {getErrorLabel(room.error)}
+                        </button>
+                      ) : (
+                        <StatusListener
+                          containerName={room.containerName}
+                          initialStatus={room.status}
+                        />
+                      )}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
                       <input

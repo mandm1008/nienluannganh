@@ -2,18 +2,25 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { User, Lock } from 'lucide-react';
 
-export default function AdminLogin() {
+export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (username === 'admin' && password === 'password') {
+    const result = await signIn('credentials', {
+      username,
+      password,
+      redirect: false,
+    });
+
+    if (result?.ok) {
       router.push('/admin/exam-rooms');
     } else {
       setError('Invalid username or password');
