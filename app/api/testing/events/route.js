@@ -4,11 +4,11 @@ import {
   STATUS_CODE,
   dispatchStatusEvent,
 } from '@/lib/moodle/status';
+import { dispatchEventRestoreFinished } from '@/lib/moodle/webhooks';
 
 export async function GET() {
-  dispatchStatusEvent(
-    'elearningsystem-20250717104633',
-    STATUS_CODE.DEPLOYING_INITIALIZING
-  );
+  dispatchEventRestoreFinished({
+    token: process.env.MOODLE_CLOUDSUPPORT_TOKEN,
+  });
   return NextResponse.json({ message: 'Event dispatch' });
 }

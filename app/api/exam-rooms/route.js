@@ -11,6 +11,10 @@ export async function GET() {
   for (const room of rooms) {
     const quizData = await getQuizById(room.quizId);
 
+    if (!quizData) {
+      continue;
+    }
+
     data.push({
       ...room.toObject(),
       timeOpen: quizData.timeopen,
