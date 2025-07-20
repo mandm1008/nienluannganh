@@ -1,4 +1,4 @@
-import { initDatabase } from '@/lib/cloud/sql/moodle';
+import { initDatabase } from '@/lib/cloud/sql/controls';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

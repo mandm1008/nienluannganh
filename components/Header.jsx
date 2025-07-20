@@ -17,8 +17,10 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 export default function Header() {
+  const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -89,9 +91,12 @@ export default function Header() {
             >
               <Menu size={24} />
             </button>
-            <span className="text-lg font-semibold text-white bg-blue-500 p-2 rounded-lg">
+            <a
+              href="https://elsystem.dominhman.id.vn"
+              className="text-lg font-semibold text-white bg-blue-500 p-2 rounded-lg"
+            >
               ELSystem
-            </span>
+            </a>
           </div>
 
           {/* Center - Language Selector */}
@@ -104,39 +109,41 @@ export default function Header() {
                 <Bell size={24} />
               </button>
             </Tippy>
-            <Tippy
-              content={
-                <div className="w-48 bg-white rounded-lg p-2 font-semibold">
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
-                  >
-                    <User size={16} /> Profile
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
-                  >
-                    <Settings size={16} /> Settings
-                  </Link>
-                  <Link
-                    href="/logout"
-                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
-                  >
-                    <LogOut size={16} /> Logout
-                  </Link>
-                </div>
-              }
-              interactive={true}
-              placement="bottom-end"
-              theme="light"
-              animation="scale"
-            >
-              <button className="flex items-center p-2 rounded-full border border-gray-300 hover:cursor-pointer">
-                <User size={24} />
-                <ChevronDown size={16} className="ml-2" />
-              </button>
-            </Tippy>
+            {session?.user && (
+              <Tippy
+                content={
+                  <div className="w-48 bg-white rounded-lg p-2 font-semibold">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
+                    >
+                      <User size={16} /> Profile
+                    </Link>
+                    <Link
+                      href="/settings"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
+                    >
+                      <Settings size={16} /> Settings
+                    </Link>
+                    <Link
+                      href="/logout"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
+                    >
+                      <LogOut size={16} /> Logout
+                    </Link>
+                  </div>
+                }
+                interactive={true}
+                placement="bottom-end"
+                theme="light"
+                animation="scale"
+              >
+                <button className="flex items-center p-2 rounded-full border border-gray-300 hover:cursor-pointer">
+                  <User size={24} />
+                  <ChevronDown size={16} className="ml-2" />
+                </button>
+              </Tippy>
+            )}
           </div>
         </header>
       </div>

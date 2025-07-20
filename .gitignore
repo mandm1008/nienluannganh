@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/lib/moodle/stemp
+/lib/cloud/sql/data
+/*.mongodb.js
 
 # next.js
 /.next/
@@ -29,6 +32,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+/logs/*
 
 # env files (can opt-in for committing if needed)
 .env*

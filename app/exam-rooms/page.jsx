@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -11,43 +12,54 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 
+const fetcher = async (url) => {
+  const response = await fetch(url);
+  const examData = await response.json();
+
+  return examData
+    .filter((exam) => exam.timeOpen > 0)
+    .map((exam) => ({
+      ...exam,
+      id: exam._id,
+      title: `${exam.quizName} (${exam.courseName})`,
+      start: moment.unix(exam.timeOpen).toISOString(),
+      end: moment.unix(exam.timeClose).toISOString(),
+      allDay: false,
+      serviceUrl: exam.serviceUrl || null,
+    }));
+};
+
 export default function ExamCalendar() {
-  const [events, setEvents] = useState([]);
+  const {
+    data: events = [],
+    error,
+    isLoading,
+  } = useSWR('/api/exam-rooms', fetcher, {
+    refreshInterval: 10000,
+    revalidateOnMount: true,
+    revalidateIfStale: true,
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
 
   useEffect(() => {
-    const fetchExamData = async () => {
-      try {
-        const response = await fetch('/api/exam-rooms');
-        const examData = await response.json();
+    if (!events || events.length === 0) {
+      if (filteredEvents.length !== 0) setFilteredEvents([]);
+      return;
+    }
 
-        const formattedEvents = examData
-          .filter((exam) => exam.timeOpen > 0)
-          .map((exam) => ({
-            id: exam._id,
-            title: `${exam.quizName} (${exam.courseName})`,
-            start: moment.unix(exam.timeOpen).toISOString(),
-            end: moment.unix(exam.timeClose).toISOString(),
-            allDay: false,
-            serviceUrl: exam.serviceUrl || null,
-          }));
-
-        setEvents(formattedEvents);
-        setFilteredEvents(formattedEvents);
-      } catch (error) {
-        console.error('Error fetching exam data:', error);
-      }
-    };
-
-    fetchExamData();
-  }, []);
-
-  useEffect(() => {
-    if (events && events.length > 0) {
-      const filtered = events.filter((event) =>
+    const filtered = events.filter(
+      (event) =>
+        event.title &&
         event.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    );
+
+    const isSame =
+      filteredEvents.length === filtered.length &&
+      filteredEvents.every((e, i) => e.id === filtered[i].id);
+
+    if (!isSame) {
       setFilteredEvents(filtered);
     }
   }, [searchTerm, events]);
@@ -82,17 +94,16 @@ export default function ExamCalendar() {
             )}
           </div>
         }
-        placement="top" // Vị trí tooltip (top, bottom, left, right)
-        animation="scale" // Hiệu ứng mở tooltip (scale, shift-away, fade, ...)
-        arrow={true} // Hiển thị mũi tên tooltip
-        delay={[200, 0]} // Hiển thị sau 200ms, tắt ngay lập tức
-        interactive={true} // Cho phép hover vào tooltip
+        placement="top"
+        animation="scale"
+        arrow={true}
+        delay={[200, 0]}
+        interactive={true}
         appendTo={document.body}
       >
         <div className="p-2 rounded-lg shadow-md flex items-center gap-2">
           <span className="font-semibold">
-            {eventInfo.event.title}
-            {'  '}
+            {eventInfo.event.title}{' '}
             {eventInfo.event.extendedProps.serviceUrl && <span>⭐</span>}
           </span>
         </div>
@@ -122,33 +133,48 @@ export default function ExamCalendar() {
         )}
       </div>
 
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView="timeGridWeek"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
-        }}
-        buttonText={{
-          today: 'Today',
-          month: 'Month',
-          week: 'Week',
-          day: 'Day',
-          list: 'List',
-        }}
-        events={filteredEvents}
-        editable={false}
-        selectable={true}
-        nowIndicator={true}
-        eventContent={renderEventTippy}
-        eventClick={(info) => {
-          if (info.event.extendedProps.serviceUrl) {
-            window.open(info.event.extendedProps.serviceUrl, '_blank');
-            info.jsEvent.preventDefault();
-          }
-        }}
-      />
+      {isLoading && <p>Đang tải lịch thi...</p>}
+      {error && <p className="text-red-500">Lỗi khi tải dữ liệu lịch thi.</p>}
+      {!isLoading && filteredEvents.length === 0 && (
+        <p className="text-center p-6 text-gray-500 border rounded-md bg-white">
+          Không có lịch thi nào sắp đến.
+        </p>
+      )}
+
+      {filteredEvents.length > 0 && (
+        <FullCalendar
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            listPlugin,
+          ]}
+          initialView="dayGridMonth"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+          }}
+          buttonText={{
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day',
+            list: 'List',
+          }}
+          events={filteredEvents}
+          editable={false}
+          selectable={true}
+          nowIndicator={true}
+          eventContent={renderEventTippy}
+          eventClick={(info) => {
+            if (info.event.extendedProps.serviceUrl) {
+              window.open(info.event.extendedProps.serviceUrl, '_blank');
+              info.jsEvent.preventDefault();
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
