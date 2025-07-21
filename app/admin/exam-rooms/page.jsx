@@ -23,9 +23,9 @@ export default function ExamRoomList() {
     data: rooms = [],
     error,
     isLoading,
-    mutate, // để gọi lại thủ công sau khi POST
+    mutate,
   } = useSWR('/api/exam-rooms', fetcher, {
-    refreshInterval: 10000, // tự động refresh mỗi 10s
+    refreshInterval: 10000,
     revalidateOnMount: true,
     revalidateIfStale: true,
   });
@@ -56,7 +56,7 @@ export default function ExamRoomList() {
 
   async function handleBulkAction() {
     if (!action) {
-      alert('Vui lòng chọn một hành động');
+      alert('Please select an action');
       return;
     }
 
@@ -80,7 +80,7 @@ export default function ExamRoomList() {
 
       await mutate();
     } catch (error) {
-      console.error('Lỗi khi gửi yêu cầu:', error);
+      console.error('Failed to submit request:', error);
     } finally {
       setIsRunning(false);
     }
@@ -88,7 +88,7 @@ export default function ExamRoomList() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Danh sách Exam Rooms</h1>
+      <h1 className="text-2xl font-bold mb-4">Exam Rooms</h1>
 
       <div className="mb-4 flex gap-4">
         <select
@@ -96,23 +96,24 @@ export default function ExamRoomList() {
           onChange={(e) => setAction(e.target.value)}
           className="px-4 py-2 border rounded"
         >
-          <option value="">Chọn hành động</option>
-          <option value={EXAMROOM_ACTIONS.START_CTN}>Start Container</option>
-          <option value={EXAMROOM_ACTIONS.STOP_CTN}>Stop Container</option>
+          <option value="">Choose an action</option>
+          <option value={EXAMROOM_ACTIONS.START_CTN}>Start Rooms</option>
+          <option value={EXAMROOM_ACTIONS.STOP_CTN}>Stop Rooms</option>
+          <option value={EXAMROOM_ACTIONS.RE_SCHEDULE}>Reschedule Rooms</option>
           <option value={EXAMROOM_ACTIONS.DELETE_DATA}>
-            Delete (Không lưu)
+            Delete Rooms (Do Not Save)
           </option>
           <option value={EXAMROOM_ACTIONS.DELETE_SAVE_DATA}>
-            Delete (Lưu)
+            Delete Rooms (Keep Data)
           </option>
-          <option value={EXAMROOM_ACTIONS.FIX_CTN}>Sửa lỗi</option>
+          <option value={EXAMROOM_ACTIONS.FIX_CTN}>Auto Fix Issues</option>
         </select>
         <button
           onClick={handleBulkAction}
           className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-400"
           disabled={selectedRooms.size === 0 || !action || isRunning}
         >
-          Thực hiện
+          Execute
         </button>
         {isRunning && (
           <Image
@@ -127,26 +128,26 @@ export default function ExamRoomList() {
           onClick={selectAll}
           className="px-4 py-2 bg-green-500 text-white rounded"
         >
-          Chọn tất cả
+          Select All
         </button>
         <button
           onClick={deselectAll}
           className="px-4 py-2 bg-red-500 text-white rounded"
         >
-          Hủy chọn tất cả
+          Deselect All
         </button>
       </div>
 
       {isLoading ? (
-        <p>Đang tải dữ liệu...</p>
+        <p>Loading data...</p>
       ) : error ? (
-        <p className="text-red-500">Lỗi khi tải dữ liệu.</p>
+        <p className="text-red-500">Failed to load data.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="table-auto w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-300 px-4 py-2">Chọn</th>
+                <th className="border border-gray-300 px-4 py-2">Select</th>
                 <th className="border border-gray-300 px-4 py-2">Quiz ID</th>
                 <th className="border border-gray-300 px-4 py-2">Quiz Name</th>
                 <th className="border border-gray-300 px-4 py-2">
@@ -166,7 +167,7 @@ export default function ExamRoomList() {
               {rooms.length === 0 ? (
                 <tr>
                   <td colSpan="10" className="text-center text-gray-500 py-4">
-                    Không có lịch thi nào sắp đến
+                    No upcoming exam schedules
                   </td>
                 </tr>
               ) : (

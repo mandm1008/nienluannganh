@@ -73,12 +73,11 @@ export default function ExamCalendar() {
               <strong>📌 {eventInfo.event.title}</strong>
             </p>
             <p>
-              🕒 Bắt đầu:{' '}
+              🕒 Start:{' '}
               {moment(eventInfo.event.start).format('HH:mm, DD/MM/YYYY')}
             </p>
             <p>
-              ⏳ Kết thúc:{' '}
-              {moment(eventInfo.event.end).format('HH:mm, DD/MM/YYYY')}
+              ⏳ End: {moment(eventInfo.event.end).format('HH:mm, DD/MM/YYYY')}
             </p>
             {eventInfo.event.extendedProps.serviceUrl && (
               <p className="text-center mt-2">
@@ -113,12 +112,12 @@ export default function ExamCalendar() {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">Lịch Thi</h1>
+      <h1 className="text-2xl font-bold mb-4">Exam Calendar</h1>
 
       <div className="relative mb-4">
         <input
           type="text"
-          placeholder="Filtering by name..."
+          placeholder="Filter by exam name..."
           className="p-2 border rounded-md w-100 pr-10"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -133,11 +132,11 @@ export default function ExamCalendar() {
         )}
       </div>
 
-      {isLoading && <p>Đang tải lịch thi...</p>}
-      {error && <p className="text-red-500">Lỗi khi tải dữ liệu lịch thi.</p>}
+      {isLoading && <p>Loading exam calendar...</p>}
+      {error && <p className="text-red-500">Error loading exam data.</p>}
       {!isLoading && filteredEvents.length === 0 && (
         <p className="text-center p-6 text-gray-500 border rounded-md bg-white">
-          Không có lịch thi nào sắp đến.
+          No upcoming exams found.
         </p>
       )}
 
