@@ -3,6 +3,8 @@ import { Server } from 'socket.io';
 import { EventManager } from '@/lib/tools/events';
 import { STATUS_CHANGE, STATUS_SOCKET_NAME } from '@/lib/moodle/status';
 import { startAutoFix } from '@/lib/moodle/auto-fix';
+import { scheduleAllJob } from '@/lib/tools/schedule';
+import { overrideConsole } from '@/logger';
 
 export default function handler(req, res) {
   if (!res.socket.server.io) {
@@ -38,8 +40,12 @@ export default function handler(req, res) {
       });
     });
 
-    // auto fix error container logic
-    startAutoFix();
+    // init server logic
+    try {
+      overrideConsole();
+      startAutoFix();
+      scheduleAllJob();
+    } catch (error) {}
 
     res.socket.server.io = io;
   }

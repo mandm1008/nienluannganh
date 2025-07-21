@@ -12,6 +12,8 @@ import {
   fixErrorJob,
 } from '@/lib/moodle/jobs';
 import { authOptions } from '@/lib/auth/options';
+import { STATUS_CODE } from '@/lib/moodle/status';
+import { updateSchedule } from '@/lib/tools/schedule';
 
 export async function POST(req) {
   const session = await getServerSession(authOptions);
@@ -93,6 +95,19 @@ export async function POST(req) {
         try {
           const nroom = await ExamRoomModel.findById(room.id);
           await fixErrorJob(nroom.containerName);
+        } catch (err) {
+          console.error(`[ADMIN_ACTION]@@ ${err.message}`);
+        }
+      }
+      break;
+    case EXAMROOM_ACTIONS.RE_SCHEDULE:
+      for (const room of rooms) {
+        // reset schedule
+        try {
+          const nroom = await ExamRoomModel.findById(room.id);
+          nroom.status = STATUS_CODE.REGISTERED;
+          await nroom.save();
+          await updateSchedule(nroom.containerName);
         } catch (err) {
           console.error(`[ADMIN_ACTION]@@ ${err.message}`);
         }

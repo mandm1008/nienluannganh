@@ -1,7 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Tùy chỉnh đường dẫn file log
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const logDir = path.join(__dirname, 'logs');
 const logFile = path.join(logDir, 'app.log');
 
@@ -12,14 +15,13 @@ if (!fs.existsSync(logDir)) {
 const logStream = fs.createWriteStream(logFile, { flags: 'a' });
 
 function stripAnsiCodes(text) {
-  // Regex xóa tất cả escape sequences ANSI (màu sắc, định dạng)
   return text.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
 function formatMessage(type, args) {
   const timestamp = new Date().toISOString();
 
-  const formattedArgs = args.map(arg => {
+  const formattedArgs = args.map((arg) => {
     try {
       if (typeof arg === 'object' && arg !== null) {
         return JSON.stringify(arg, null, 2);
@@ -37,7 +39,7 @@ function formatMessage(type, args) {
   return `[${type} ${timestamp}]\n${cleanMessage}\n`;
 }
 
-function overrideConsole() {
+export function overrideConsole() {
   const original = {
     log: console.log,
     info: console.info,
@@ -49,10 +51,7 @@ function overrideConsole() {
     console[method] = (...args) => {
       const message = formatMessage(method.toUpperCase(), args);
       logStream.write(message);
-      // Bỏ dòng dưới nếu không muốn in ra console
       original[method].apply(console, args);
     };
   });
 }
-
-overrideConsole();
