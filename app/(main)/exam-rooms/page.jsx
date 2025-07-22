@@ -25,7 +25,7 @@ const fetcher = async (url) => {
       start: moment.unix(exam.timeOpen).toISOString(),
       end: moment.unix(exam.timeClose).toISOString(),
       allDay: false,
-      serviceUrl: exam.serviceUrl || null,
+      serviceUrl: exam.containerCourseId ? exam.serviceUrl : null,
     }));
 };
 

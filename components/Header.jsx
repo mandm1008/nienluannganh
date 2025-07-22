@@ -17,7 +17,7 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -100,7 +100,7 @@ export default function Header() {
           </div>
 
           {/* Center - Language Selector */}
-          <div className="hidden md:block text-gray-600">VIETNAMESE (VI)</div>
+          <div className="hidden md:block text-gray-600">ENGLISH (EN)</div>
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
@@ -113,7 +113,7 @@ export default function Header() {
               <Tippy
                 content={
                   <div className="w-48 bg-white rounded-lg p-2 font-semibold">
-                    <Link
+                    {/* <Link
                       href="/profile"
                       className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
                     >
@@ -124,13 +124,13 @@ export default function Header() {
                       className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
                     >
                       <Settings size={16} /> Settings
-                    </Link>
-                    <Link
-                      href="/logout"
-                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
+                    </Link> */}
+                    <button
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer w-full text-left"
                     >
                       <LogOut size={16} /> Logout
-                    </Link>
+                    </button>
                   </div>
                 }
                 interactive={true}
