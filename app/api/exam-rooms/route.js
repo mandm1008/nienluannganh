@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
+import { canActions } from '@/lib/moodle/status';
 
 export async function GET() {
   await connectDB();
@@ -26,6 +27,7 @@ export async function GET() {
       serviceUrl: room.serviceUrl
         ? `${room.serviceUrl}/course/view.php?id=${room.containerCourseId}`
         : null,
+      canActions: !!room.error || canActions(room.status),
     });
   }
 

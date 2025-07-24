@@ -12,7 +12,7 @@ import {
   fixErrorJob,
 } from '@/lib/moodle/jobs';
 import { authOptions } from '@/lib/auth/options';
-import { STATUS_CODE } from '@/lib/moodle/status';
+import { STATUS_CODE, canActions } from '@/lib/moodle/status';
 import { updateSchedule } from '@/lib/tools/schedule';
 
 export async function POST(req) {
@@ -38,6 +38,8 @@ export async function POST(req) {
         // start container
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+          if (!canActions(nroom.status)) continue;
+
           if (!nroom.serviceUrl) {
             await createGCRJob(nroom.containerName);
           }
@@ -50,6 +52,8 @@ export async function POST(req) {
       for (const room of rooms) {
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+          if (!canActions(nroom.status)) continue;
+
           if (nroom.serviceUrl) {
             await stopGCRJob(nroom.containerName);
           }
@@ -68,6 +72,8 @@ export async function POST(req) {
         // delete and save data
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+          if (!canActions(nroom.status)) continue;
+
           if (nroom.serviceUrl) {
             await deleteGCRJob(nroom.containerName);
           }
@@ -81,6 +87,8 @@ export async function POST(req) {
         // delete data
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+          if (!canActions(nroom.status)) continue;
+
           if (nroom.serviceUrl) {
             await deleteGCRJob(nroom.containerName, { saveData: false });
           }
@@ -94,6 +102,7 @@ export async function POST(req) {
         // try fix
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+
           await fixErrorJob(nroom.containerName);
         } catch (err) {
           console.error(`[ADMIN_ACTION]@@ ${err.message}`);
@@ -105,6 +114,8 @@ export async function POST(req) {
         // reset schedule
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+          if (!canActions(nroom.status)) continue;
+
           nroom.status = STATUS_CODE.REGISTERED;
           await nroom.save();
           await updateSchedule(nroom.containerName);
