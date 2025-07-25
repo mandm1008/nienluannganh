@@ -23,6 +23,7 @@ export async function GET() {
       timeLimit: quizData.timelimit,
       quizName: quizData.name,
       courseName: quizData.coursename,
+      courseShortName: quizData.courseshortname,
       courseId: quizData.courseid,
       serviceUrl: room.serviceUrl
         ? `${room.serviceUrl}/course/view.php?id=${room.containerCourseId}`

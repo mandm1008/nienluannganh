@@ -21,7 +21,7 @@ const fetcher = async (url) => {
     .map((exam) => ({
       ...exam,
       id: exam._id,
-      title: `${exam.quizName} (${exam.courseName})`,
+      title: `${exam.quizName} (${exam.courseName.includes(exam.courseShortName) ? exam.courseName : `${exam.courseShortName} - ${exam.courseName}`})`,
       start: moment.unix(exam.timeOpen).toISOString(),
       end: moment.unix(exam.timeClose).toISOString(),
       allDay: false,
@@ -100,11 +100,9 @@ export default function ExamCalendar() {
         interactive={true}
         appendTo={document.body}
       >
-        <div className="p-2 rounded-lg shadow-md flex items-center gap-2">
-          <span className="font-semibold">
-            {eventInfo.event.title}{' '}
-            {eventInfo.event.extendedProps.serviceUrl && <span>⭐</span>}
-          </span>
+        <div className="rounded-sm pl-1 flex font-semibold text-white bg-blue-500 min-w-full min-h-full text-nowrap whitespace-nowrap">
+          {eventInfo.event.title}{' '}
+          {eventInfo.event.extendedProps.serviceUrl && <span>⭐</span>}
         </div>
       </Tippy>
     );
