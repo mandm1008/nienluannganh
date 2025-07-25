@@ -29,6 +29,10 @@ export default function StatusListener({
     };
   }, [containerName]);
 
+  useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus])
+
   if (status === null) {
     return <span className="text-gray-400">Waiting for status...</span>;
   }

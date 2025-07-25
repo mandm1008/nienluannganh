@@ -76,6 +76,8 @@ export async function POST(req) {
 
           if (nroom.serviceUrl) {
             await deleteGCRJob(nroom.containerName);
+          } else {
+            await deleteGCRJob(nroom.containerName, { saveData: false });
           }
         } catch (err) {
           console.error(`[ADMIN_ACTION]@@ ${err.message}`);
@@ -89,9 +91,7 @@ export async function POST(req) {
           const nroom = await ExamRoomModel.findById(room.id);
           if (!canActions(nroom.status)) continue;
 
-          if (nroom.serviceUrl) {
-            await deleteGCRJob(nroom.containerName, { saveData: false });
-          }
+          await deleteGCRJob(nroom.containerName, { saveData: false });
         } catch (err) {
           console.error(`[ADMIN_ACTION]@@ ${err.message}`);
         }
@@ -114,6 +114,7 @@ export async function POST(req) {
         // reset schedule
         try {
           const nroom = await ExamRoomModel.findById(room.id);
+          if (nroom.serviceUrl) continue;
           if (!canActions(nroom.status)) continue;
 
           nroom.status = STATUS_CODE.REGISTERED;
