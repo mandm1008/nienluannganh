@@ -1,1 +1,11 @@
 @import 'tailwindcss';
+
+.fc-event-main {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.fc-event {
+    overflow: hidden;
+}
