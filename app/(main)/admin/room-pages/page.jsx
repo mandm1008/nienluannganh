@@ -7,6 +7,7 @@ import useSWR from 'swr';
 import moment from 'moment';
 import StatusListener from '@/components/StatusListener';
 import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/errors';
+import { useDebounce } from '@/lib/hooks';
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -16,6 +17,7 @@ const fetcher = async (url) => {
     ...json,
     data: json.data.map((d) => ({
       ...d,
+      courseName: `${d.courseName.includes(d.courseShortName) ? d.courseName : `${d.courseShortName} - ${d.courseName}`}`,
       timeOpen: moment.unix(d.timeOpen).local().format('YYYY-MM-DDTHH:mm'),
       timeClose: moment.unix(d.timeClose).local().format('YYYY-MM-DDTHH:mm'),
     })),
@@ -26,6 +28,7 @@ export default function ExamRoomList() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5); // default limit=5
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 400);
   const [sort, setSort] = useState('asc'); // 'asc' | 'desc'
 
   const [selectedRooms, setSelectedRooms] = useState(new Set());
@@ -39,7 +42,7 @@ export default function ExamRoomList() {
     mutate,
   } = useSWR(
     `/api/exam-rooms/pages?page=${page}&limit=${limit}&search=${encodeURIComponent(
-      search
+      debouncedSearch
     )}&sort=${sort}`,
     fetcher,
     {

@@ -3,6 +3,16 @@ import { connectDB } from '@/lib/db/connect';
 import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
 import { canActions } from '@/lib/moodle/status';
+import slugify from 'slugify';
+
+function normalize(text) {
+  return slugify(text || '', {
+    replacement: '',
+    lower: true,
+    strict: true,
+    locale: 'vi',
+  });
+}
 
 export async function GET(req) {
   await connectDB();
@@ -11,7 +21,7 @@ export async function GET(req) {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '10', 10);
   const skip = (page - 1) * limit;
-  const search = (searchParams.get('search') || '').toLowerCase().trim();
+  const search = normalize(searchParams.get('search') || '');
   const sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
 
   const allRooms = await ExamRoomModel.find();
@@ -44,10 +54,10 @@ export async function GET(req) {
   if (search) {
     filtered = results.filter((item) => {
       return (
-        item.quizName?.toLowerCase().includes(search) ||
-        item.courseName?.toLowerCase().includes(search) ||
-        item.courseShortName?.toLowerCase().includes(search) ||
-        item.containerName?.toLowerCase().includes(search)
+        normalize(item.quizName).includes(search) ||
+        normalize(item.courseName).includes(search) ||
+        normalize(item.courseShortName).includes(search) ||
+        normalize(item.containerName).includes(search)
       );
     });
   }
