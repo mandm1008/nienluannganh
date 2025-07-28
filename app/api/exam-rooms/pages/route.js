@@ -23,6 +23,11 @@ export async function GET(req) {
   const skip = (page - 1) * limit;
   const search = normalize(searchParams.get('search') || '');
   const sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
+  const statusParams = searchParams.get('status') || '';
+  const statusFilters = statusParams
+    .split(',')
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((s) => !isNaN(s)); // valid int only
 
   const allRooms = await ExamRoomModel.find();
   const results = [];
@@ -60,6 +65,10 @@ export async function GET(req) {
         normalize(item.containerName).includes(search)
       );
     });
+  }
+
+  if (statusFilters.length > 0) {
+    filtered = filtered.filter((item) => statusFilters.includes(item.status));
   }
 
   filtered.sort((a, b) => {

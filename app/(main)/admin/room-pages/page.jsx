@@ -1,11 +1,16 @@
 'use client';
 
 import Image from 'next/image';
-import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/actions';
-import { useState } from 'react';
+import {
+  EXAMROOM_ACTIONS,
+  EXAMROOM_ACTION_LABELS,
+} from '@/lib/tools/constants/actions';
+import { useState, useEffect } from 'react';
+import Select from 'react-select';
 import useSWR from 'swr';
 import moment from 'moment';
 import StatusListener from '@/components/StatusListener';
+import { STATUS_MAP_SHORT } from '@/lib/moodle/status';
 import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/errors';
 import { useDebounce } from '@/lib/hooks';
 
@@ -17,12 +22,36 @@ const fetcher = async (url) => {
     ...json,
     data: json.data.map((d) => ({
       ...d,
-      courseName: `${d.courseName.includes(d.courseShortName) ? d.courseName : `${d.courseShortName} - ${d.courseName}`}`,
+      courseName: `${
+        d.courseName.includes(d.courseShortName)
+          ? d.courseName
+          : `${d.courseShortName} - ${d.courseName}`
+      }`,
       timeOpen: moment.unix(d.timeOpen).local().format('YYYY-MM-DDTHH:mm'),
       timeClose: moment.unix(d.timeClose).local().format('YYYY-MM-DDTHH:mm'),
     })),
   };
 };
+
+const STATUS_OPTIONS = Object.entries(STATUS_MAP_SHORT).map(
+  ([key, { label, value }]) => ({
+    label,
+    value,
+  })
+);
+
+const SORT_OPTIONS = [
+  { value: 'asc', label: 'Sort by Open Time ↑' },
+  { value: 'desc', label: 'Sort by Open Time ↓' },
+];
+
+const EXAMROOM_ACTION_OPTIONS = [
+  { value: '', label: 'No Action' },
+  ...Object.entries(EXAMROOM_ACTION_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  })),
+];
 
 export default function ExamRoomList() {
   const [page, setPage] = useState(1);
@@ -30,10 +59,14 @@ export default function ExamRoomList() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 400);
   const [sort, setSort] = useState('asc'); // 'asc' | 'desc'
+  const [statusFilter, setStatusFilter] = useState([]);
+  const statusQuery =
+    statusFilter.length > 0 ? `&status=${statusFilter.join(',')}` : '';
 
   const [selectedRooms, setSelectedRooms] = useState(new Set());
   const [action, setAction] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const {
     data: response = { data: [], total: 0, totalPages: 1 },
@@ -43,7 +76,7 @@ export default function ExamRoomList() {
   } = useSWR(
     `/api/exam-rooms/pages?page=${page}&limit=${limit}&search=${encodeURIComponent(
       debouncedSearch
-    )}&sort=${sort}`,
+    )}&sort=${sort}${statusQuery}`,
     fetcher,
     {
       refreshInterval: 10000,
@@ -54,6 +87,10 @@ export default function ExamRoomList() {
 
   const rooms = response.data || [];
   const totalPages = response.totalPages || 1;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   function toggleSelection(id) {
     const room = rooms.find((r) => r._id === id);
@@ -142,7 +179,7 @@ export default function ExamRoomList() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Exam Rooms</h1>
 
-      {/* Search & Sort */}
+      {/* Search */}
       <div className="mb-4 flex flex-wrap gap-4 items-center">
         <input
           type="text"
@@ -155,39 +192,54 @@ export default function ExamRoomList() {
           placeholder="Search quiz/course name..."
           className="px-4 py-2 border rounded w-64"
         />
-        <select
-          value={sort}
-          onChange={(e) => {
-            setSort(e.target.value);
-            setPage(1); // Reset page on sort
-            deselectAll();
-          }}
-          className="px-4 py-2 border rounded"
-        >
-          <option value="asc">Sort by Open Time ↑</option>
-          <option value="desc">Sort by Open Time ↓</option>
-        </select>
+
+        {/* Sort */}
+        {isMounted && (
+          <Select
+            options={SORT_OPTIONS}
+            value={SORT_OPTIONS.find((opt) => opt.value === sort)}
+            onChange={(selected) => {
+              setSort(selected.value);
+              setPage(1);
+              deselectAll();
+            }}
+            className="min-w-[250px]"
+            isSearchable={false}
+          />
+        )}
+
+        {/* Status */}
+        {isMounted && (
+          <Select
+            isMulti
+            options={STATUS_OPTIONS}
+            value={STATUS_OPTIONS.filter((opt) =>
+              opt.value.some((v) => statusFilter.includes(v))
+            )}
+            onChange={(selected) => {
+              const selectedValues = selected.flatMap((opt) => opt.value);
+              setStatusFilter(selectedValues);
+              setPage(1);
+              deselectAll();
+            }}
+            placeholder="Filter by status..."
+            className="min-w-[250px]"
+          />
+        )}
       </div>
 
       {/* Actions */}
       <div className="mb-4 flex flex-wrap gap-4">
-        <select
-          value={action}
-          onChange={(e) => setAction(e.target.value)}
-          className="px-4 py-2 border rounded"
-        >
-          <option value="">Choose an action</option>
-          <option value={EXAMROOM_ACTIONS.START_CTN}>Start Rooms</option>
-          <option value={EXAMROOM_ACTIONS.STOP_CTN}>Stop Rooms</option>
-          <option value={EXAMROOM_ACTIONS.RE_SCHEDULE}>Reschedule Rooms</option>
-          <option value={EXAMROOM_ACTIONS.DELETE_DATA}>
-            Delete Rooms (Do Not Save)
-          </option>
-          <option value={EXAMROOM_ACTIONS.DELETE_SAVE_DATA}>
-            Delete Rooms (Keep Data)
-          </option>
-          <option value={EXAMROOM_ACTIONS.FIX_CTN}>Auto Fix Issues</option>
-        </select>
+        {isMounted && (
+          <Select
+            options={EXAMROOM_ACTION_OPTIONS}
+            value={EXAMROOM_ACTION_OPTIONS.find((opt) => opt.value === action)}
+            onChange={(selected) => setAction(selected?.value || '')}
+            placeholder="Choose an action"
+            className="min-w-[250px]"
+            isSearchable={false}
+          />
+        )}
 
         <button
           onClick={handleBulkAction}
