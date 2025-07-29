@@ -11,6 +11,7 @@ import moment from 'moment';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
+import { includesOf } from '@/lib/tools/slug';
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -21,7 +22,11 @@ const fetcher = async (url) => {
     .map((exam) => ({
       ...exam,
       id: exam._id,
-      title: `${exam.quizName} (${exam.courseName.includes(exam.courseShortName) ? exam.courseName : `${exam.courseShortName} - ${exam.courseName}`})`,
+      title: `${exam.quizName} (${
+        exam.courseName.includes(exam.courseShortName)
+          ? exam.courseName
+          : `${exam.courseShortName} - ${exam.courseName}`
+      })`,
       start: moment.unix(exam.timeOpen).toISOString(),
       end: moment.unix(exam.timeClose).toISOString(),
       allDay: false,
@@ -50,9 +55,7 @@ export default function ExamCalendar() {
     }
 
     const filtered = events.filter(
-      (event) =>
-        event.title &&
-        event.title.toLowerCase().includes(searchTerm.toLowerCase())
+      (event) => event.title && includesOf(event.title, searchTerm)
     );
 
     const isSame =
@@ -170,6 +173,7 @@ export default function ExamCalendar() {
               info.jsEvent.preventDefault();
             }
           }}
+          height="auto"
         />
       )}
     </div>

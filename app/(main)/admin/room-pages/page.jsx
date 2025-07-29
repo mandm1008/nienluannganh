@@ -53,6 +53,11 @@ const EXAMROOM_ACTION_OPTIONS = [
   })),
 ];
 
+const LIMIT_OPTIONS = [5, 10, 20, 50].map((num) => ({
+  label: `Show ${num}`,
+  value: num,
+}));
+
 export default function ExamRoomList() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5); // default limit=5
@@ -431,21 +436,20 @@ export default function ExamRoomList() {
 
             {/* Right: Limit selector */}
             <div className="mt-2 sm:mt-0">
-              <select
-                value={limit}
-                onChange={(e) => {
-                  setLimit(Number(e.target.value));
-                  setPage(1);
-                  deselectAll();
-                }}
-                className="px-2 py-1 border rounded"
-              >
-                {[5, 10, 20, 50].map((num) => (
-                  <option key={num} value={num}>
-                    Show {num}
-                  </option>
-                ))}
-              </select>
+              {isMounted && (
+                <Select
+                  options={LIMIT_OPTIONS}
+                  value={LIMIT_OPTIONS.find((opt) => opt.value === limit)}
+                  onChange={(selected) => {
+                    setLimit(selected.value);
+                    setPage(1);
+                    deselectAll();
+                  }}
+                  isSearchable={false}
+                  menuPlacement="top"
+                  className="min-w-[80px]"
+                />
+              )}
             </div>
           </div>
         </>

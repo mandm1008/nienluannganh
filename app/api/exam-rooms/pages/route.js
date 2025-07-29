@@ -4,6 +4,7 @@ import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
 import { getQuizById } from '@/lib/moodle/get-quiz';
 import { canActions } from '@/lib/moodle/status';
 import slugify from 'slugify';
+import { includesOf } from '@/lib/tools/slug';
 
 function normalize(text) {
   return slugify(text || '', {
@@ -21,7 +22,7 @@ export async function GET(req) {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '10', 10);
   const skip = (page - 1) * limit;
-  const search = normalize(searchParams.get('search') || '');
+  const search = searchParams.get('search') || '';
   const sort = searchParams.get('sort') === 'asc' ? 'asc' : 'desc';
   const statusParams = searchParams.get('status') || '';
   const statusFilters = statusParams
@@ -59,10 +60,10 @@ export async function GET(req) {
   if (search) {
     filtered = results.filter((item) => {
       return (
-        normalize(item.quizName).includes(search) ||
-        normalize(item.courseName).includes(search) ||
-        normalize(item.courseShortName).includes(search) ||
-        normalize(item.containerName).includes(search)
+        includesOf(item.quizName, search) ||
+        includesOf(item.courseName, search) ||
+        includesOf(item.courseShortName, search) ||
+        includesOf(item.containerName, search)
       );
     });
   }
