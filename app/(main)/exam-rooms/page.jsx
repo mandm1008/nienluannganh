@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import FullCalendar from '@fullcalendar/react';
@@ -39,7 +38,6 @@ export default function ExamCalendar() {
   const [searchTerm, setSearchTerm] = useState('');
   const [username, setUsername] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const searchParams = useSearchParams();
 
   const query = username.trim()
     ? `/api/exam-rooms?username=${username}`
@@ -56,7 +54,10 @@ export default function ExamCalendar() {
   });
 
   useEffect(() => {
-    const urlUsername = searchParams.get('username');
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlUsername = params.get('username');
     const storedUsername = localStorage.getItem('elsystem_username');
 
     if (urlUsername) {
