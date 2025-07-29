@@ -1,7 +1,7 @@
 // pages/api/socket.js
 import { Server } from 'socket.io';
 import { EventManager } from '@/lib/tools/events';
-import { STATUS_CHANGE, STATUS_SOCKET_NAME } from '@/lib/moodle/status';
+import { STATUS_CHANGE, STATUS_SOCKET_NAME } from '@/lib/moodle/state/status';
 import { startAutoFix } from '@/lib/moodle/auto-fix';
 import { scheduleAllJob } from '@/lib/tools/schedule';
 import { overrideConsole } from '@/logger';

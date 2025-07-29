@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db/connect';
-import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
-import { getQuizById } from '@/lib/moodle/get-quiz';
-import { canActions } from '@/lib/moodle/status';
+import { ExamRoomModel } from '@/lib/db/models';
+import { getQuizById } from '@/lib/moodle/db/control';
+import { canActions } from '@/lib/moodle/state/status';
 import slugify from 'slugify';
 import { includesOf } from '@/lib/tools/slug';
 

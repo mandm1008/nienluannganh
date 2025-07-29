@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { exportContainer } from '@/lib/moodle/container';
-import { dispatchEventBackupFinished } from '@/lib/moodle/webhooks';
+import { dispatchEventBackupFinished } from '@/lib/moodle/services/webhooks';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);

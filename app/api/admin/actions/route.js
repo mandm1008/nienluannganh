@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { connectDB } from '@/lib/db/connect';
-import ExamRoomModel from '@/lib/db/models/ExamRoom.model';
-import { getQuizById } from '@/lib/moodle/get-quiz';
+import { ExamRoomModel } from '@/lib/db/models';
 import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/actions';
-import { deployCloudRun, deleteCloudRun } from '@/lib/cloud/run/controls';
 import {
   createGCRJob,
   deleteGCRJob,
@@ -12,7 +10,7 @@ import {
   fixErrorJob,
 } from '@/lib/moodle/jobs';
 import { authOptions } from '@/lib/auth/options';
-import { STATUS_CODE, canActions } from '@/lib/moodle/status';
+import { STATUS_CODE, canActions } from '@/lib/moodle/state/status';
 import { updateSchedule } from '@/lib/tools/schedule';
 
 export async function POST(req) {

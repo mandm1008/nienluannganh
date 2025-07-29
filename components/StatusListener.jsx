@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import socket from '@/lib/tools/socket';
-import { getStatusLabel, STATUS_SOCKET_NAME } from '@/lib/moodle/status';
+import { getStatusLabel, STATUS_SOCKET_NAME } from '@/lib/moodle/state/status';
 
 export default function StatusListener({
   containerName,
@@ -31,7 +31,7 @@ export default function StatusListener({
 
   useEffect(() => {
     setStatus(initialStatus);
-  }, [initialStatus])
+  }, [initialStatus]);
 
   if (status === null) {
     return <span className="text-gray-400">Waiting for status...</span>;

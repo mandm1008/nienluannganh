@@ -1,4 +1,4 @@
-import handleEvents from '@/lib/moodle/webhooks';
+import handleEvents from '@/lib/moodle/services/webhooks';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {

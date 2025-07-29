@@ -10,8 +10,8 @@ import Select from 'react-select';
 import useSWR from 'swr';
 import moment from 'moment';
 import StatusListener from '@/components/StatusListener';
-import { STATUS_MAP_SHORT } from '@/lib/moodle/status';
-import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/errors';
+import { STATUS_MAP_SHORT } from '@/lib/moodle/state/status';
+import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/state/errors';
 import { useDebounce } from '@/lib/hooks';
 
 const fetcher = async (url) => {

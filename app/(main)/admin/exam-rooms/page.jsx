@@ -6,7 +6,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import moment from 'moment';
 import StatusListener from '@/components/StatusListener';
-import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/errors';
+import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/state/errors';
 
 const fetcher = async (url) => {
   const response = await fetch(url);

@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import FullCalendar from '@fullcalendar/react';
@@ -35,18 +36,36 @@ const fetcher = async (url) => {
 };
 
 export default function ExamCalendar() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [username, setUsername] = useState('');
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const searchParams = useSearchParams();
+
+  const query = username.trim()
+    ? `/api/exam-rooms?username=${username}`
+    : '/api/exam-rooms';
+
   const {
     data: events = [],
     error,
     isLoading,
-  } = useSWR('/api/exam-rooms', fetcher, {
+  } = useSWR(query, fetcher, {
     refreshInterval: 10000,
     revalidateOnMount: true,
     revalidateIfStale: true,
   });
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredEvents, setFilteredEvents] = useState([]);
+  useEffect(() => {
+    const urlUsername = searchParams.get('username');
+    const storedUsername = localStorage.getItem('elsystem_username');
+
+    if (urlUsername) {
+      setUsername(urlUsername);
+      localStorage.setItem('elsystem_username', urlUsername);
+    } else if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   useEffect(() => {
     if (!events || events.length === 0) {
@@ -115,18 +134,33 @@ export default function ExamCalendar() {
     <div className="p-4 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Exam Calendar</h1>
 
-      <div className="relative mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-4 gap-2">
+        {/* Search by exam name */}
         <input
           type="text"
-          placeholder="Filter by exam name..."
-          className="p-2 border rounded-md w-100 pr-10"
+          placeholder="Search by exam name..."
+          className="p-2 border rounded-md w-full sm:w-64"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {searchTerm && (
+
+        {/* Username filter */}
+        <input
+          type="text"
+          placeholder="Filter by username..."
+          className="p-2 border rounded-md w-full sm:w-64"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        {/* Clear both */}
+        {(searchTerm || username) && (
           <button
-            onClick={() => setSearchTerm('')}
-            className="inline-block ml-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            onClick={() => {
+              setSearchTerm('');
+              setUsername('');
+            }}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
           >
             Clear
           </button>
