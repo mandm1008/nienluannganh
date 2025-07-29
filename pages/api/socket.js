@@ -8,7 +8,7 @@ import { overrideConsole } from '@/logger';
 
 export default function handler(req, res) {
   if (!res.socket.server.io) {
-    console.log('[SOCKET] Initializing socket...');
+    console.log('[SOCKET] Starting socket server...');
 
     const io = new Server(res.socket.server, {
       path: '/api/socket',
@@ -20,14 +20,14 @@ export default function handler(req, res) {
 
       socket.on(`subscribe:${STATUS_SOCKET_NAME}`, (containerName) => {
         socket.join(containerName);
-        console.log(
-          `[SOCKET] ${socket.id} joined room: ${STATUS_SOCKET_NAME}:${containerName}`
-        );
+        // console.log(
+        //   `[SOCKET] ${socket.id} joined room: ${STATUS_SOCKET_NAME}:${containerName}`
+        // );
       });
 
-      socket.on('disconnect', () => {
-        console.log('[SOCKET] Disconnected:', socket.id);
-      });
+      // socket.on('disconnect', () => {
+      //   console.log('[SOCKET] Disconnected:', socket.id);
+      // });
     });
 
     EventManager.on(STATUS_CHANGE, ({ containerName, status }) => {
@@ -39,6 +39,8 @@ export default function handler(req, res) {
         status,
       });
     });
+
+    console.log('[SOCKET] Started!');
 
     // init server logic
     try {
