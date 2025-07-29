@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { restoreCourse } from '@/lib/moodle/restore';
+import { restoreCourse } from '@/lib/moodle/services/restore';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);

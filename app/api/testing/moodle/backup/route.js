@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { backupCourse, exportUsers } from '@/lib/moodle/backup';
+import { backupCourse, exportUsers } from '@/lib/moodle/services/backup';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);

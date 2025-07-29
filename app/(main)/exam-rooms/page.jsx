@@ -11,6 +11,7 @@ import moment from 'moment';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
+import { includesOf } from '@/lib/tools/slug';
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -21,27 +22,51 @@ const fetcher = async (url) => {
     .map((exam) => ({
       ...exam,
       id: exam._id,
-      title: `${exam.quizName} (${exam.courseName})`,
+      title: `${exam.quizName} (${
+        exam.courseName.includes(exam.courseShortName)
+          ? exam.courseName
+          : `${exam.courseShortName} - ${exam.courseName}`
+      })`,
       start: moment.unix(exam.timeOpen).toISOString(),
       end: moment.unix(exam.timeClose).toISOString(),
       allDay: false,
-      serviceUrl: exam.serviceUrl || null,
+      serviceUrl: exam.containerCourseId ? exam.serviceUrl : null,
     }));
 };
 
 export default function ExamCalendar() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [username, setUsername] = useState('');
+  const [filteredEvents, setFilteredEvents] = useState([]);
+
+  const query = username.trim()
+    ? `/api/exam-rooms?username=${username}`
+    : '/api/exam-rooms';
+
   const {
     data: events = [],
     error,
     isLoading,
-  } = useSWR('/api/exam-rooms', fetcher, {
+  } = useSWR(query, fetcher, {
     refreshInterval: 10000,
     revalidateOnMount: true,
     revalidateIfStale: true,
   });
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredEvents, setFilteredEvents] = useState([]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlUsername = params.get('username');
+    const storedUsername = localStorage.getItem('elsystem_username');
+
+    if (urlUsername) {
+      setUsername(urlUsername);
+      localStorage.setItem('elsystem_username', urlUsername);
+    } else if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   useEffect(() => {
     if (!events || events.length === 0) {
@@ -50,9 +75,7 @@ export default function ExamCalendar() {
     }
 
     const filtered = events.filter(
-      (event) =>
-        event.title &&
-        event.title.toLowerCase().includes(searchTerm.toLowerCase())
+      (event) => event.title && includesOf(event.title, searchTerm)
     );
 
     const isSame =
@@ -100,11 +123,9 @@ export default function ExamCalendar() {
         interactive={true}
         appendTo={document.body}
       >
-        <div className="p-2 rounded-lg shadow-md flex items-center gap-2">
-          <span className="font-semibold">
-            {eventInfo.event.title}{' '}
-            {eventInfo.event.extendedProps.serviceUrl && <span>⭐</span>}
-          </span>
+        <div className="rounded-sm pl-1 flex font-semibold text-white bg-blue-500 min-w-full min-h-full text-nowrap whitespace-nowrap">
+          {eventInfo.event.title}{' '}
+          {eventInfo.event.extendedProps.serviceUrl && <span>⭐</span>}
         </div>
       </Tippy>
     );
@@ -114,18 +135,33 @@ export default function ExamCalendar() {
     <div className="p-4 bg-gray-100 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Exam Calendar</h1>
 
-      <div className="relative mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-4 gap-2">
+        {/* Search by exam name */}
         <input
           type="text"
-          placeholder="Filter by exam name..."
-          className="p-2 border rounded-md w-100 pr-10"
+          placeholder="Search by exam name..."
+          className="p-2 border rounded-md w-full sm:w-64"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {searchTerm && (
+
+        {/* Username filter */}
+        <input
+          type="text"
+          placeholder="Filter by username..."
+          className="p-2 border rounded-md w-full sm:w-64"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        {/* Clear both */}
+        {(searchTerm || username) && (
           <button
-            onClick={() => setSearchTerm('')}
-            className="inline-block ml-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            onClick={() => {
+              setSearchTerm('');
+              setUsername('');
+            }}
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
           >
             Clear
           </button>
@@ -172,6 +208,7 @@ export default function ExamCalendar() {
               info.jsEvent.preventDefault();
             }
           }}
+          height="auto"
         />
       )}
     </div>

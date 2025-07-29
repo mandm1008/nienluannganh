@@ -3,8 +3,8 @@ import {
   STATUS_CHANGE,
   STATUS_CODE,
   dispatchStatusEvent,
-} from '@/lib/moodle/status';
-import { dispatchEventRestoreFinished } from '@/lib/moodle/webhooks';
+} from '@/lib/moodle/state/status';
+import { dispatchEventRestoreFinished } from '@/lib/moodle/services/webhooks';
 
 export async function GET() {
   dispatchEventRestoreFinished({

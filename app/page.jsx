@@ -1,5 +1,8 @@
 import { redirect } from 'next/navigation';
 
-export default function Home() {
-  redirect('exam-rooms');
+export default async function Home({ searchParams }) {
+  const queryString = new URLSearchParams(await searchParams).toString();
+  const target = queryString ? `/exam-rooms?${queryString}` : '/exam-rooms';
+
+  redirect(target);
 }

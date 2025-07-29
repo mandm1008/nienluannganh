@@ -21,7 +21,7 @@ export default function Login() {
     });
 
     if (result?.ok) {
-      router.push('/admin/exam-rooms');
+      router.push('/admin/');
     } else {
       setError('Invalid username or password');
     }

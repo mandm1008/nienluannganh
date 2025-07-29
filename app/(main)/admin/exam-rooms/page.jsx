@@ -6,7 +6,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import moment from 'moment';
 import StatusListener from '@/components/StatusListener';
-import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/errors';
+import { ERROR_CODE, getErrorLabel } from '@/lib/moodle/state/errors';
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -35,6 +35,11 @@ export default function ExamRoomList() {
   const [isRunning, setIsRunning] = useState(false);
 
   function toggleSelection(id) {
+    const room = rooms.find((r) => r._id === id);
+    if (!room?.canActions) {
+      return;
+    }
+
     setSelectedRooms((prev) => {
       const newSelection = new Set(prev);
       if (newSelection.has(id)) {
@@ -47,7 +52,10 @@ export default function ExamRoomList() {
   }
 
   function selectAll() {
-    setSelectedRooms(new Set(rooms.map((room) => room._id)));
+    const selectable = rooms
+      .filter((room) => room.canActions)
+      .map((room) => room._id);
+    setSelectedRooms(new Set(selectable));
   }
 
   function deselectAll() {
@@ -83,6 +91,7 @@ export default function ExamRoomList() {
       console.error('Failed to submit request:', error);
     } finally {
       setIsRunning(false);
+      deselectAll();
     }
   }
 
@@ -172,12 +181,18 @@ export default function ExamRoomList() {
                 </tr>
               ) : (
                 rooms.map((room, index) => (
-                  <tr key={room._id || index} className="text-center">
+                  <tr
+                    key={room._id || index}
+                    className={`text-center ${
+                      !room.canActions ? 'opacity-50 pointer-events-none' : ''
+                    }`}
+                  >
                     <td className="border border-gray-300 px-4 py-2">
                       <input
                         type="checkbox"
                         onChange={() => toggleSelection(room._id)}
                         checked={selectedRooms.has(room._id)}
+                        disabled={!room.canActions}
                         className="w-5 h-5"
                       />
                     </td>
