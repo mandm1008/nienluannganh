@@ -27,10 +27,12 @@ const fetcher = async (url) => {
           ? exam.courseName
           : `${exam.courseShortName} - ${exam.courseName}`
       })`,
-      start: moment.unix(exam.timeOpen).toISOString(),
-      end: moment.unix(exam.timeClose).toISOString(),
+      start: moment.unix(exam.timeOpen).toDate(),
+      end: moment.unix(exam.timeClose).toDate(),
+      timeStart: moment.unix(exam.timeOpen).format('DD/MM/YYYY HH:mm'),
+      timeEnd: moment.unix(exam.timeClose).format('DD/MM/YYYY HH:mm'),
       allDay: false,
-      serviceUrl: exam.containerCourseId ? exam.serviceUrl : null,
+      serviceUrl: exam.canActions ? exam.serviceUrl : null,
     }));
 };
 
@@ -88,6 +90,8 @@ export default function ExamCalendar() {
   }, [searchTerm, events]);
 
   const renderEventTippy = (eventInfo) => {
+    const { timeStart, timeEnd, serviceUrl } = eventInfo.event.extendedProps;
+
     return (
       <Tippy
         content={
@@ -95,17 +99,12 @@ export default function ExamCalendar() {
             <p>
               <strong>📌 {eventInfo.event.title}</strong>
             </p>
-            <p>
-              🕒 Start:{' '}
-              {moment(eventInfo.event.start).format('HH:mm, DD/MM/YYYY')}
-            </p>
-            <p>
-              ⏳ End: {moment(eventInfo.event.end).format('HH:mm, DD/MM/YYYY')}
-            </p>
-            {eventInfo.event.extendedProps.serviceUrl && (
+            <p>🕒 Start: {timeStart}</p>
+            <p>⏳ End: {timeEnd}</p>
+            {serviceUrl && (
               <p className="text-center mt-2">
                 <a
-                  href={eventInfo.event.extendedProps.serviceUrl}
+                  href={serviceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
@@ -124,8 +123,7 @@ export default function ExamCalendar() {
         appendTo={document.body}
       >
         <div className="rounded-sm pl-1 flex font-semibold text-white bg-blue-500 min-w-full min-h-full text-nowrap whitespace-nowrap">
-          {eventInfo.event.title}{' '}
-          {eventInfo.event.extendedProps.serviceUrl && <span>⭐</span>}
+          {eventInfo.event.title} {serviceUrl && <span>⭐</span>}
         </div>
       </Tippy>
     );

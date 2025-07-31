@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db/connect';
 import { ExamRoomModel } from '@/lib/db/models';
 import { getQuizById, getQuizIdsByUsername } from '@/lib/moodle/db/control';
 import { canActions } from '@/lib/moodle/state/status';
+import { normalizeServiceUrl } from '@/lib/moodle/rooms';
 
 export async function GET(req) {
   await connectDB();
@@ -43,9 +44,7 @@ export async function GET(req) {
       courseName: quizData.coursename,
       courseShortName: quizData.courseshortname,
       courseId: quizData.courseid,
-      serviceUrl: room.serviceUrl
-        ? `${room.serviceUrl}/course/view.php?id=${room.containerCourseId}`
-        : null,
+      serviceUrl: normalizeServiceUrl(room.serviceUrl, room.containerCourseId),
       canActions: !!room.error || canActions(room.status),
     });
   }

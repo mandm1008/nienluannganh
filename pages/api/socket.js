@@ -1,7 +1,11 @@
 // pages/api/socket.js
 import { Server } from 'socket.io';
 import { EventManager } from '@/lib/tools/events';
-import { STATUS_CHANGE, STATUS_SOCKET_NAME } from '@/lib/moodle/state/status';
+import {
+  STATUS_CHANGE,
+  STATUS_SOCKET_NAME,
+  getStatusLabel,
+} from '@/lib/moodle/state/status';
 import { startAutoFix } from '@/lib/moodle/auto-fix';
 import { scheduleAllJob } from '@/lib/tools/schedule';
 import { overrideConsole } from '@/logger';
@@ -32,7 +36,9 @@ export default function handler(req, res) {
 
     EventManager.on(STATUS_CHANGE, ({ containerName, status }) => {
       console.log(
-        `[SOCKET] Status for ${STATUS_SOCKET_NAME}:${containerName} -> ${status}`
+        `[SOCKET] Status for ${STATUS_SOCKET_NAME}:${containerName} -> ${getStatusLabel(
+          status
+        )}`
       );
       io.to(containerName).emit(`update:${STATUS_SOCKET_NAME}`, {
         containerName,

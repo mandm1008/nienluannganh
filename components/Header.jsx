@@ -22,6 +22,7 @@ import { useSession, signOut } from 'next-auth/react';
 export default function Header() {
   const { data: session, status } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     window.addEventListener('click', closeMenu);
@@ -42,6 +43,11 @@ export default function Header() {
     e.stopPropagation();
     setMenuOpen(false);
   }
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await signOut({ callbackUrl: '/' });
+  };
 
   return (
     <div className="flex">
@@ -126,10 +132,18 @@ export default function Header() {
                       <Settings size={16} /> Settings
                     </Link> */}
                     <button
-                      onClick={() => signOut({ callbackUrl: '/' })}
-                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer w-full text-left"
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer w-full text-left relative"
+                      disabled={loggingOut}
                     >
                       <LogOut size={16} /> Logout
+                      {loggingOut && (
+                        <img
+                          src="/loading.svg"
+                          alt="Logging out..."
+                          className="absolute right-4 h-8 w-8"
+                        />
+                      )}
                     </button>
                   </div>
                 }

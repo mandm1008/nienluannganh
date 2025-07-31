@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { uploadFile } from '@/lib/moodle/services/restore';
+import { uploadFile } from '@/lib/tools/files';
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);

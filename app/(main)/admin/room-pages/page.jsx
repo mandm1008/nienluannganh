@@ -121,7 +121,7 @@ export default function ExamRoomList() {
 
   async function handleBulkAction() {
     if (!action) {
-      alert('Please select an action');
+      alert('Please select an action!');
       return;
     }
 
@@ -338,7 +338,7 @@ export default function ExamRoomList() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`px-2 py-1 text-sm rounded font-medium inline-block whitespace-nowrap ${
-                              room.containerCourseId
+                              room.canActions
                                 ? 'bg-red-100 text-red-800'
                                 : 'bg-gray-200 text-gray-500 cursor-not-allowed pointer-events-none'
                             }`}
@@ -351,9 +351,9 @@ export default function ExamRoomList() {
                       </td>
                       <td className="border px-4 py-2">
                         {room.error === ERROR_CODE.ERROR_KILL ? (
-                          <button className="bg-red-600 text-white px-3 py-1 rounded font-bold">
+                          <span className="bg-red-600 text-white px-3 py-1 rounded font-bold">
                             {getErrorLabel(room.error)}
-                          </button>
+                          </span>
                         ) : (
                           <StatusListener
                             containerName={room.containerName}

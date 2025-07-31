@@ -9,16 +9,21 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
     const result = await signIn('credentials', {
       username,
       password,
       redirect: false,
     });
+
+    setLoading(false);
 
     if (result?.ok) {
       router.push('/admin/');
@@ -65,9 +70,17 @@ export default function Login() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition shadow-md"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition shadow-md flex justify-center items-center"
+            disabled={loading}
           >
-            Login
+            <span className={loading ? 'invisible' : 'visible'}>Login</span>
+            {loading && (
+              <img
+                src="/loading.svg"
+                alt="Loading..."
+                className="absolute h-10 w-10"
+              />
+            )}
           </button>
         </form>
       </div>

@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-/lib/moodle/stemp
+/stemp
 /lib/cloud/sql/data
 /*.mongodb.js
 
