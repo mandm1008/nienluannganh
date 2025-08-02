@@ -11,3 +11,5 @@ export async function GET(req) {
 
   return NextResponse.json({ message: 'DELETE Successfully!' });
 }
+
+export const runtime = 'nodejs';

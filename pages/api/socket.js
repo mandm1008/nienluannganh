@@ -6,9 +6,6 @@ import {
   STATUS_SOCKET_NAME,
   getStatusLabel,
 } from '@/lib/moodle/state/status';
-import { startAutoFix } from '@/lib/moodle/auto-fix';
-import { scheduleAllJob } from '@/lib/tools/schedule';
-import { overrideConsole } from '@/logger';
 
 export default function handler(req, res) {
   if (!res.socket.server.io) {
@@ -47,13 +44,6 @@ export default function handler(req, res) {
     });
 
     console.log('[SOCKET] Started!');
-
-    // init server logic
-    try {
-      overrideConsole();
-      startAutoFix();
-      scheduleAllJob();
-    } catch (error) {}
 
     res.socket.server.io = io;
   }

@@ -132,3 +132,5 @@ export async function POST(req) {
 
   return NextResponse.json({ message: 'Xử lý thành công!' }, { status: 200 });
 }
+
+export const runtime = 'nodejs';
