@@ -1,10 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {
-  EXAMROOM_ACTIONS,
-  EXAMROOM_ACTION_LABELS,
-} from '@/lib/tools/constants/actions';
+import { EXAMROOM_ACTION_LABELS } from '@/lib/moodle/actions/name';
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import useSWR from 'swr';

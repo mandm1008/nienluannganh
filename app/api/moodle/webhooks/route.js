@@ -1,6 +1,8 @@
 import handleEvents from '@/lib/moodle/services/webhooks';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 export async function POST(req) {
   try {
     const event = await req.json();

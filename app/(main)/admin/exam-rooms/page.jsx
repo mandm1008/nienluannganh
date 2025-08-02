@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { EXAMROOM_ACTIONS } from '@/lib/tools/constants/actions';
+import { EXAMROOM_ACTIONS } from '@/lib/moodle/actions/name';
 import { useState } from 'react';
 import useSWR from 'swr';
 import moment from 'moment';
