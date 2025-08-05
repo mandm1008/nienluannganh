@@ -116,6 +116,17 @@ export default function ExamRoomList() {
     setSelectedRooms(new Set());
   }
 
+  function toggleSelectAll(checked) {
+    if (checked) {
+      const selectable = rooms
+        .filter((room) => room.canActions)
+        .map((room) => room._id);
+      setSelectedRooms(new Set(selectable));
+    } else {
+      setSelectedRooms(new Set());
+    }
+  }
+
   async function handleBulkAction() {
     if (!action) {
       alert('Please select an action!');
@@ -260,20 +271,6 @@ export default function ExamRoomList() {
             className="ml-2"
           />
         )}
-
-        <button
-          onClick={selectAll}
-          className="px-4 py-2 bg-green-500 text-white rounded"
-        >
-          Select All
-        </button>
-
-        <button
-          onClick={deselectAll}
-          className="px-4 py-2 bg-red-500 text-white rounded"
-        >
-          Deselect All
-        </button>
       </div>
 
       {isLoading ? (
@@ -287,7 +284,34 @@ export default function ExamRoomList() {
             <table className="table-auto w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-200">
-                  <th className="border px-4 py-2">Select</th>
+                  <th className="border px-4 py-2">
+                    <input
+                      type="checkbox"
+                      className="w-5 h-5"
+                      onChange={(e) => toggleSelectAll(e.target.checked)}
+                      checked={
+                        rooms.length > 0 &&
+                        rooms
+                          .filter((r) => r.canActions)
+                          .every((r) => selectedRooms.has(r._id))
+                      }
+                      indeterminate={
+                        selectedRooms.size > 0 &&
+                        !rooms
+                          .filter((r) => r.canActions)
+                          .every((r) => selectedRooms.has(r._id))
+                      }
+                      ref={(el) => {
+                        if (el) {
+                          el.indeterminate =
+                            selectedRooms.size > 0 &&
+                            !rooms
+                              .filter((r) => r.canActions)
+                              .every((r) => selectedRooms.has(r._id));
+                        }
+                      }}
+                    />
+                  </th>
                   <th className="border px-4 py-2">Quiz ID</th>
                   <th className="border px-4 py-2">Quiz Name</th>
                   <th className="border px-4 py-2">Course Name</th>
