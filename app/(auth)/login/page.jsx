@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { User, Lock } from 'lucide-react';
 
 export default function Login() {
@@ -25,8 +25,10 @@ export default function Login() {
 
     setLoading(false);
 
-    if (result?.ok) {
-      router.push('/admin/');
+    if (result.ok) {
+      console.log(result);
+      await getSession();
+      router.push('/admin');
     } else {
       setError('Invalid username or password');
     }

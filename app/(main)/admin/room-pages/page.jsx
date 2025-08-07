@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { EXAMROOM_ACTION_LABELS } from '@/lib/moodle/actions/name';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import useSWR from 'swr';
 import moment from 'moment';
@@ -70,6 +70,8 @@ export default function ExamRoomList() {
   const [isRunning, setIsRunning] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
+  const selectAllRef = useRef(null);
+
   const {
     data: response = { data: [], total: 0, totalPages: 1 },
     error,
@@ -93,6 +95,16 @@ export default function ExamRoomList() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const selectable = rooms.filter((r) => r.canActions);
+      const allSelected = selectable.every((r) => selectedRooms.has(r._id));
+      const isIndeterminate = selectedRooms.size > 0 && !allSelected;
+
+      selectAllRef.current.indeterminate = isIndeterminate;
+    }
+  }, [rooms, selectedRooms]);
 
   function toggleSelection(id) {
     const room = rooms.find((r) => r._id === id);
@@ -286,6 +298,7 @@ export default function ExamRoomList() {
                 <tr className="bg-gray-200">
                   <th className="border px-4 py-2">
                     <input
+                      ref={selectAllRef}
                       type="checkbox"
                       className="w-5 h-5"
                       onChange={(e) => toggleSelectAll(e.target.checked)}
@@ -295,21 +308,6 @@ export default function ExamRoomList() {
                           .filter((r) => r.canActions)
                           .every((r) => selectedRooms.has(r._id))
                       }
-                      indeterminate={
-                        selectedRooms.size > 0 &&
-                        !rooms
-                          .filter((r) => r.canActions)
-                          .every((r) => selectedRooms.has(r._id))
-                      }
-                      ref={(el) => {
-                        if (el) {
-                          el.indeterminate =
-                            selectedRooms.size > 0 &&
-                            !rooms
-                              .filter((r) => r.canActions)
-                              .every((r) => selectedRooms.has(r._id));
-                        }
-                      }}
                     />
                   </th>
                   <th className="border px-4 py-2">Quiz ID</th>

@@ -13,11 +13,10 @@ import {
   Briefcase,
   Shield,
 } from 'lucide-react';
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css';
-import 'tippy.js/themes/light.css';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+import Tooltip from '@/components/ui/Tooltip';
+import Dropdown from '@/components/ui/Dropdown';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -110,16 +109,27 @@ export default function Header() {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            <Tippy content="Notifications" placement="bottom" theme="light">
+            <Tooltip content="Notifications" placement="bottom">
               <button className="p-2 rounded-lg hover:bg-gray-100 hover:cursor-pointer">
                 <Bell size={24} />
               </button>
-            </Tippy>
+            </Tooltip>
             {session?.user && (
-              <Tippy
-                content={
-                  <div className="w-48 bg-white rounded-lg p-2 font-semibold">
-                    {/* <Link
+              <Dropdown
+                placement="bottom-end"
+                trigger={
+                  <button className="flex items-center p-2 rounded-full border border-gray-300 hover:cursor-pointer">
+                    <User size={24} />
+                    <ChevronDown size={16} className="ml-2" />
+                  </button>
+                }
+              >
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer w-full text-left relative"
+                  disabled={loggingOut}
+                >
+                  {/* <Link
                       href="/profile"
                       className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer"
                     >
@@ -131,32 +141,16 @@ export default function Header() {
                     >
                       <Settings size={16} /> Settings
                     </Link> */}
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 hover:cursor-pointer w-full text-left relative"
-                      disabled={loggingOut}
-                    >
-                      <LogOut size={16} /> Logout
-                      {loggingOut && (
-                        <img
-                          src="/loading.svg"
-                          alt="Logging out..."
-                          className="absolute right-4 h-8 w-8"
-                        />
-                      )}
-                    </button>
-                  </div>
-                }
-                interactive={true}
-                placement="bottom-end"
-                theme="light"
-                animation="scale"
-              >
-                <button className="flex items-center p-2 rounded-full border border-gray-300 hover:cursor-pointer">
-                  <User size={24} />
-                  <ChevronDown size={16} className="ml-2" />
+                  <LogOut size={16} /> Logout
+                  {loggingOut && (
+                    <img
+                      src="/loading.svg"
+                      alt="Logging out..."
+                      className="absolute right-4 h-8 w-8"
+                    />
+                  )}
                 </button>
-              </Tippy>
+              </Dropdown>
             )}
           </div>
         </header>

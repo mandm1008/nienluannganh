@@ -8,10 +8,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import moment from 'moment';
-import Tippy from '@tippyjs/react';
-import 'tippy.js/dist/tippy.css';
-import 'tippy.js/animations/scale.css';
 import { includesOf } from '@/lib/tools/slug';
+import EventRoom from '@/components/ui/EventRoom';
 
 const fetcher = async (url) => {
   const response = await fetch(url);
@@ -93,39 +91,16 @@ export default function ExamCalendar() {
     const { timeStart, timeEnd, serviceUrl } = eventInfo.event.extendedProps;
 
     return (
-      <Tippy
-        content={
-          <div className="text-sm p-2">
-            <p>
-              <strong>📌 {eventInfo.event.title}</strong>
-            </p>
-            <p>🕒 Start: {timeStart}</p>
-            <p>⏳ End: {timeEnd}</p>
-            {serviceUrl && (
-              <p className="text-center mt-2">
-                <a
-                  href={serviceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                >
-                  Go to room
-                </a>
-              </p>
-            )}
-          </div>
-        }
-        placement="top"
-        animation="scale"
-        arrow={true}
-        delay={[200, 0]}
-        interactive={true}
-        appendTo={document.body}
+      <EventRoom
+        title={eventInfo.event.title}
+        timeStart={timeStart}
+        timeEnd={timeEnd}
+        serviceUrl={serviceUrl}
       >
-        <div className="rounded-sm pl-1 flex font-semibold text-white bg-blue-500 min-w-full min-h-full text-nowrap whitespace-nowrap">
+        <div className="rounded-sm pl-1 flex font-semibold text-white bg-blue-500 min-w-full min-h-full text-nowrap whitespace-nowrap cursor-pointer">
           {eventInfo.event.title} {serviceUrl && <span>⭐</span>}
         </div>
-      </Tippy>
+      </EventRoom>
     );
   };
 
