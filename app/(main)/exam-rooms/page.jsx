@@ -98,7 +98,7 @@ export default function ExamCalendar() {
         serviceUrl={serviceUrl}
       >
         <div className="rounded-sm pl-1 flex font-semibold text-white bg-blue-500 min-w-full min-h-full text-nowrap whitespace-nowrap cursor-pointer">
-          {eventInfo.event.title} {serviceUrl && <span>⭐</span>}
+          {serviceUrl && <span>⭐</span>} {eventInfo.event.title}
         </div>
       </EventRoom>
     );
