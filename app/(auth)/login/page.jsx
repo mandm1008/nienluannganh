@@ -1,16 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, getSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { User, Lock } from 'lucide-react';
 
-export default function Login() {
+export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const { data: session, status, update } = useSession();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/admin');
+    }
+  }, [status, router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,16 +31,23 @@ export default function Login() {
       redirect: false,
     });
 
-    setLoading(false);
-
-    if (result.ok) {
-      console.log(result);
-      await getSession();
-      router.push('/admin');
+    if (result?.ok) {
+      await update();
+      router.push('/admin/room-pages');
     } else {
       setError('Invalid username or password');
     }
+
+    setLoading(false);
   };
+
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
+        <p className="text-white">Checking session...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
